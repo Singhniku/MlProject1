@@ -1,0 +1,726 @@
+<meta charset="utf-8">
+<title>MS Fall 2027 — Application Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
+    --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
+    --gold:#96691C; --gold-soft:#F4EAD6;
+    --good:#2E7D46; --good-soft:#E1F0E4;
+    --warn:#A8731E; --warn-soft:#F6ECD8;
+    --bad:#B3423A; --bad-soft:#F6E3E1;
+    --info:#3A5FA8; --info-soft:#E4EAF6;
+    --shadow:0 1px 3px rgba(20,35,28,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0E1512; --card:#161F1A; --ink:#E4ECE7; --muted:#8FA398; --line:#263129;
+      --accent:#4CB08A; --accent-soft:#1B2E26; --accent-ink:#8AD4B4;
+      --gold:#D6A24B; --gold-soft:#2E2717;
+      --good:#5CBF7C; --good-soft:#1A2E20;
+      --warn:#D9A544; --warn-soft:#2E2716;
+      --bad:#E0837B; --bad-soft:#331D1B;
+      --info:#8AA8E0; --info-soft:#1B2333;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1512; --card:#161F1A; --ink:#E4ECE7; --muted:#8FA398; --line:#263129;
+    --accent:#4CB08A; --accent-soft:#1B2E26; --accent-ink:#8AD4B4;
+    --gold:#D6A24B; --gold-soft:#2E2717;
+    --good:#5CBF7C; --good-soft:#1A2E20;
+    --warn:#D9A544; --warn-soft:#2E2716;
+    --bad:#E0837B; --bad-soft:#331D1B;
+    --info:#8AA8E0; --info-soft:#1B2333;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
+    --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
+    --gold:#96691C; --gold-soft:#F4EAD6;
+    --good:#2E7D46; --good-soft:#E1F0E4;
+    --warn:#A8731E; --warn-soft:#F6ECD8;
+    --bad:#B3423A; --bad-soft:#F6E3E1;
+    --info:#3A5FA8; --info-soft:#E4EAF6;
+    --shadow:0 1px 3px rgba(20,35,28,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 80px;}
+  header h1{font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    font-size:clamp(24px,4vw,32px);margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+  header .sub{color:var(--muted);margin:0 0 12px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:4px 12px;font-size:13px;box-shadow:var(--shadow);}
+  .chip b{color:var(--accent-ink);}
+  nav{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:22px;overflow-x:auto;}
+  nav button{appearance:none;background:none;border:none;border-bottom:2px solid transparent;
+    margin-bottom:-2px;padding:10px 14px;font:inherit;font-weight:600;font-size:14px;
+    color:var(--muted);cursor:pointer;white-space:nowrap;}
+  nav button:hover{color:var(--ink);}
+  nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px;}
+  nav button.on{color:var(--accent-ink);border-bottom-color:var(--accent);}
+  section{display:none;}
+  section.on{display:block;}
+  h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:20px;margin:0 0 4px;}
+  .note{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:74ch;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
+  .stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  .stat .v{font-size:26px;font-weight:700;margin-top:2px;}
+  .stat .d{font-size:12px;color:var(--muted);margin-top:2px;}
+  .tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);}
+  table{border-collapse:collapse;width:100%;min-width:1040px;font-size:14px;}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td .cname{font-weight:650;}
+  td .csub{font-size:12px;color:var(--muted);}
+  .rankno{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-weight:700;font-size:17px;color:var(--gold);}
+  .pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:650;white-space:nowrap;}
+  .p-amb{background:var(--bad-soft);color:var(--bad);}
+  .p-tgt{background:var(--gold-soft);color:var(--gold);}
+  .p-safe{background:var(--good-soft);color:var(--good);}
+  .p-info{background:var(--info-soft);color:var(--info);}
+  .p-acc{background:var(--accent-soft);color:var(--accent-ink);}
+  .course{display:inline-block;background:var(--accent-soft);color:var(--accent-ink);
+    border-radius:5px;padding:1px 7px;font-size:11.5px;margin:1px 2px 1px 0;}
+  a{color:var(--accent-ink);font-weight:600;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
+  .deadline .days{font-size:11.5px;}
+  .btn{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);border-radius:7px;padding:4px 10px;cursor:pointer;}
+  .btn:hover{border-color:var(--accent);color:var(--accent-ink);}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  :root[data-theme="dark"] .btn.primary, .dark .btn.primary{color:#0E1512;}
+  .detail{background:var(--bg);}
+  .detail-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:6px 4px;}
+  @media(max-width:760px){.detail-inner{grid-template-columns:1fr;}}
+  .detail h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;}
+  .checks label{display:flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer;}
+  .checks input{accent-color:var(--accent);width:15px;height:15px;}
+  textarea{width:100%;min-height:84px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;resize:vertical;}
+  textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  select.status{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+    border-radius:999px;padding:3px 26px 3px 11px;cursor:pointer;color:var(--ink);
+    background:var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M1 1l4 4 4-4" stroke="%23888" fill="none" stroke-width="1.5"/></svg>') no-repeat right 9px center;}
+  select.status:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .s-not{border-color:var(--line);}
+  .s-prog{background-color:var(--warn-soft);color:var(--warn);border-color:transparent;}
+  .s-sub{background-color:var(--info-soft);color:var(--info);border-color:transparent;}
+  .s-int{background-color:var(--gold-soft);color:var(--gold);border-color:transparent;}
+  .s-adm{background-color:var(--good-soft);color:var(--good);border-color:transparent;}
+  .s-rej{background-color:var(--bad-soft);color:var(--bad);border-color:transparent;}
+  .bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden;width:90px;}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:99px;}
+  .prog-lbl{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:8px;}
+  .vcard .rank{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:13px;color:var(--gold);font-weight:700;}
+  .vcard h3{margin:0;font-size:16.5px;}
+  .vcard .price{font-size:22px;font-weight:750;}
+  .vcard .price small{font-size:12px;color:var(--muted);font-weight:400;}
+  .vcard .meta{font-size:12.5px;color:var(--muted);}
+  .vcard footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;}
+  .tl{list-style:none;margin:0;padding:0;}
+  .tl li{display:flex;gap:14px;align-items:baseline;padding:9px 2px;border-bottom:1px dashed var(--line);}
+  .tl li:last-child{border-bottom:none;}
+  .tl .date{width:120px;flex:none;font-weight:650;font-size:13px;}
+  .tl .who{flex:1;}
+  .tl .who small{color:var(--muted);}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);}
+  .cols2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
+  @media(max-width:820px){.cols2{grid-template-columns:1fr;}}
+  .advice{border-left:3px solid var(--gold);padding:2px 0 2px 12px;font-size:13.5px;color:var(--muted);margin-top:10px;}
+  .foot{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;}
+  /* professors */
+  .toolrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  input.search{font:inherit;font-size:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;min-width:260px;flex:1;max-width:420px;}
+  input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .fchip{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+    background:var(--card);color:var(--muted);border-radius:999px;padding:5px 13px;cursor:pointer;}
+  .fchip:hover{border-color:var(--accent);color:var(--accent-ink);}
+  .fchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .fchip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .uniblock{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;}
+  .uniblock header{display:flex;gap:10px;align-items:baseline;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .uniblock header .cname{font-weight:700;}
+  .profrow{display:flex;gap:12px;align-items:center;padding:9px 16px;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
+  .profrow:last-child{border-bottom:none;}
+  .profrow .pname{font-weight:650;min-width:180px;}
+  .profrow .parea{flex:1;font-size:13px;color:var(--muted);min-width:200px;}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(10,18,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .overlay.on{display:flex;}
+  .modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:720px;width:100%;
+    max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  .modal header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);}
+  .modal header h3{margin:0;font-size:16px;font-family:"Iowan Old Style",Palatino,Georgia,serif;}
+  .modal .body{padding:14px 18px;overflow:auto;}
+  .modal textarea{min-height:340px;font-size:13px;line-height:1.55;}
+  .modal footer{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line);align-items:center;}
+  .modal .hint{margin-right:auto;font-size:12px;color:var(--muted);}
+  @media (prefers-reduced-motion: no-preference){
+    .modal{animation:pop .18s ease-out;}
+    @keyframes pop{from{transform:scale(.97);opacity:.6}to{transform:scale(1);opacity:1}}
+  }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>MS Fall 2027 · Application Dashboard</h1>
+  <p class="sub">Nikita Singh — top-50 programs, professor outreach, materials, and application tracking</p>
+  <div class="chips">
+    <span class="chip">GRE <b>305</b> · Q<b>160</b> V<b>145</b></span>
+    <span class="chip"><b>4 yrs</b> SWE · Amex, Jubilant, IndiaMart</span>
+    <span class="chip">B.Tech CSE · GPA <b>8.2</b>/10</span>
+    <span class="chip">Focus: <b>AI · ML · DS · Neural Networks</b></span>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button class="on" data-tab="overview">Overview</button>
+  <button data-tab="colleges">Top 50 Colleges</button>
+  <button data-tab="profs">Professors &amp; Outreach</button>
+  <button data-tab="tracker">Application Tracker</button>
+  <button data-tab="value">Best Under $30K</button>
+</nav>
+
+<section id="overview" class="on">
+  <div class="stats" id="statTiles"></div>
+  <div class="cols2">
+    <div class="panel">
+      <h2>Earliest deadlines — Fall 2027</h2>
+      <p class="note">First 12 deadlines across the top-50 list. Expected dates from recent cycles; Fall 2027 portals open Aug–Sep 2026.</p>
+      <ul class="tl" id="timeline"></ul>
+    </div>
+    <div class="panel">
+      <h2>Profile read</h2>
+      <p class="note" style="margin-bottom:6px">Q160 is solid for CS; 4 years of backend + agentic-AI work at Amex is the differentiator — lead with it in the SOP and in professor emails.</p>
+      <div class="advice">Realistic strategy for a GRE 305: treat ranks 1–15 as reach-only (apply to 1–2 max), focus applications on ranks 25–50, and use professor outreach to stand out — a faculty reply mentioning your email can materially help an application.</div>
+      <div class="advice">V145 is below elite-program averages. Retake targeting V150+ or lean on GRE-optional programs with a strong TOEFL/IELTS.</div>
+      <div class="advice">Emails to professors: send Tue–Thu morning (their timezone), attach resume, reference one specific recent paper, follow up once after ~10 days. Response rates are ~10–20%; volume and specificity win.</div>
+    </div>
+  </div>
+</section>
+
+<section id="colleges">
+  <h2>Top 50 US graduate programs — AI · ML · Data Science · Neural Networks · CS</h2>
+  <p class="note">All 50 programs in ascending rank order (1 = strongest), blended from US News CS graduate rankings and CSRankings AI/ML output — no schools filtered out. <b>Admit chance</b> is an estimated probability for your profile (GRE 305 · Q160 · GPA 8.2 · 4 yrs SWE); <b>Exams &amp; scores</b> shows the GRE policy with a competitive score plus TOEFL/IELTS minimums. Tuition is estimated <b>total international tuition</b> (excluding living costs); deadlines are expected Fall 2027 dates. Expand <b>Checklist &amp; notes</b> for the per-program GRE policy (<span class="pill p-safe">✓ verified</span> = checked on the university's own site in July 2026; <span class="pill p-info">est.</span> = from recent cycles), your materials checklist, and a comments box for each college.</p>
+  <div class="toolrow" id="areaFilters" role="group" aria-label="Filter by program area"></div>
+  <div class="tblwrap"><table id="collegeTbl">
+    <thead><tr>
+      <th>#</th><th>University</th><th>Admit chance</th><th>Exams &amp; scores</th><th>Program</th><th>Program areas</th>
+      <th>Tuition (est.)</th><th>Deadline (est.)</th><th>Portal</th><th>Materials</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<section id="profs">
+  <h2>Professors to reach out to</h2>
+  <p class="note">Two AI/ML faculty per university, in rank order. Affiliations are as of early 2026 — professors move, so click <b>Scholar</b> to confirm their current university and skim their 2–3 most recent papers <b>before</b> emailing; the draft has a marked slot where you cite one. <b>Draft email</b> opens a personalized mail built from your profile.</p>
+  <div class="toolrow">
+    <input class="search" id="profSearch" type="search" placeholder="Filter by university, professor, or area (e.g. NLP, vision, reinforcement)…" aria-label="Filter professors">
+  </div>
+  <div id="profList"></div>
+</section>
+
+<section id="tracker">
+  <h2>Application tracker</h2>
+  <p class="note">Status and notes persist in this browser and sync with the Top 50 tab. Type comments directly in the Notes column. Track only the schools you actually apply to — set the rest to “Not started”.</p>
+  <div class="tblwrap"><table id="trackTbl">
+    <thead><tr>
+      <th>#</th><th>University</th><th>Status</th><th>Materials</th><th>Deadline</th><th>Notes</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<section id="value">
+  <h2>Best value — under $30K total tuition</h2>
+  <p class="note">The top-50 research list is expensive (most programs run $40K–$90K+). These budget picks (≈ ₹25–26 lakh or less) sit outside the research top-50 but place well into US tech jobs — a strong plan pairs 6–8 schools from ranks 30–50 with 2–3 of these.</p>
+  <div class="cards" id="valueCards"></div>
+</section>
+
+<p class="foot">Rankings, tuition, deadlines, GRE norms, and faculty affiliations are compiled estimates as of early 2026, assembled to plan ahead for Fall 2027 — official deadlines and fees appear on each portal around Aug–Sep 2026, and faculty move between universities. Verify every school on its own portal and every professor on Google Scholar before paying a fee or sending an email.</p>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal">
+    <header><h3 id="mTitle">Outreach email</h3><button class="btn" id="mClose">Close ✕</button></header>
+    <div class="body">
+      <textarea id="mText" aria-label="Email draft"></textarea>
+    </div>
+    <footer>
+      <span class="hint" id="mHint">Replace the [bracketed] line with a real recent paper from their Scholar page.</span>
+      <button class="btn" id="mCopy">Copy email</button>
+      <a class="btn primary" id="mMailto" href="#">Open in mail app</a>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+/* r=rank, n=name, c=city, prog=degree, f=focus areas, t=est total intl tuition (null = no terminal MS route),
+   d=expected Fall-27 deadline, dn=deadline note, p=admissions portal, note=what to know,
+   profs=[name, research area] — affiliations as of early 2026, verify on Scholar */
+const S = [
+{r:1,id:"mit",n:"MIT",c:"Cambridge, MA",prog:"PhD-track / MEng",f:["AI","ML theory","NLP","Robotics"],t:null,d:"2026-12-15",dn:"PhD-track deadline",p:"https://gradadmissions.mit.edu/",note:"No general-admission MS CS; MEng is mostly internal. Realistically PhD-track only.",profs:[["Regina Barzilay","NLP · AI for medicine"],["Tommi Jaakkola","Machine learning theory · generative models"]]},
+{r:2,id:"cmu",n:"Carnegie Mellon University",c:"Pittsburgh, PA",prog:"MSCS / MSML / MSAII",f:["ML","NLP","Vision","Robotics"],t:95000,d:"2026-12-10",dn:"One round only",p:"https://applygrad.cs.cmu.edu/apply/",note:"Deepest AI course catalog anywhere; separate MS in ML and in AI & Innovation.",profs:[["Ruslan Salakhutdinov","Deep learning · foundation models"],["Graham Neubig","NLP · code generation"]]},
+{r:3,id:"stanford",n:"Stanford University",c:"Stanford, CA",prog:"MSCS",f:["AI","NLP","Vision","HCI"],t:80000,d:"2026-12-01",dn:"Single deadline",p:"https://gradadmissions.stanford.edu/",note:"MSCS AI track; GRE not accepted since 2023 cycle — SOP and LORs carry everything.",profs:[["Christopher Manning","NLP · foundation models"],["Chelsea Finn","Robot learning · meta-learning"]]},
+{r:4,id:"berkeley",n:"UC Berkeley",c:"Berkeley, CA",prog:"MEng EECS",f:["ML","Systems","Vision","RL"],t:70000,d:"2027-01-05",dn:"MEng deadline",p:"https://grad.berkeley.edu/admissions/",note:"1-year MEng is the realistic MS route; MS/PhD is research-admit only.",profs:[["Sergey Levine","Reinforcement learning · robotics"],["Trevor Darrell","Computer vision · multimodal"]]},
+{r:5,id:"uiuc",n:"UIUC",c:"Urbana-Champaign, IL",prog:"MCS",f:["Data mining","NLP","Systems","ML"],t:45000,d:"2027-01-15",dn:"Intl deadline",p:"https://cs.illinois.edu/admissions/graduate",note:"Coursework MCS admits at scale — one of the best odds among the top 10.",profs:[["Jiawei Han","Data mining · graph ML"],["Heng Ji","NLP · information extraction"]]},
+{r:6,id:"gatech",n:"Georgia Tech",c:"Atlanta, GA",prog:"MSCS",f:["ML","Vision","Systems","Robotics"],t:33000,d:"2027-02-01",dn:"Intl deadline",p:"https://grad.gatech.edu/degree-programs",note:"Best cost-to-rank ratio in the top 10; ML specialization is popular and rigorous.",profs:[["Judy Hoffman","Computer vision · domain adaptation"],["Duen Horng (Polo) Chau","Human-centered AI · ML security"]]},
+{r:7,id:"uw",n:"University of Washington",c:"Seattle, WA",prog:"MSCS (PMP)",f:["NLP","ML","Systems"],t:42000,d:"2026-12-15",dn:"PMP round",p:"https://www.cs.washington.edu/academics/grad/",note:"Full-time MS is tiny; Professional MS (evening) targets working engineers — your 4 yrs helps.",profs:[["Luke Zettlemoyer","NLP · large language models"],["Hannaneh Hajishirzi","NLP · knowledge & reasoning"]]},
+{r:8,id:"cornell",n:"Cornell University",c:"Ithaca / NYC",prog:"MEng CS",f:["ML","NLP","Systems"],t:65000,d:"2027-01-05",dn:"MEng deadline",p:"https://gradschool.cornell.edu/admissions/",note:"1-year MEng, also at Cornell Tech NYC campus — strong industry placement.",profs:[["Kilian Weinberger","Machine learning · deep nets"],["Claire Cardie","NLP · sentiment & argumentation"]]},
+{r:9,id:"princeton",n:"Princeton University",c:"Princeton, NJ",prog:"MSE CS",f:["ML theory","NLP","Vision"],t:60000,d:"2026-12-15",dn:"Single deadline",p:"https://gradschool.princeton.edu/",note:"Tiny funded MSE cohort — extraordinarily selective but tuition is often covered.",profs:[["Danqi Chen","NLP · efficient LLMs"],["Olga Russakovsky","Computer vision · fairness"]]},
+{r:10,id:"utaustin",n:"UT Austin",c:"Austin, TX",prog:"MSCS",f:["ML","RL","Systems","NLP"],t:40000,d:"2026-12-15",dn:"Intl deadline",p:"https://www.cs.utexas.edu/graduate-program",note:"Austin tech market on campus; online MSCS (MCSO) is a cheaper backdoor at ~$10K.",profs:[["Peter Stone","Reinforcement learning · robotics"],["Greg Durrett","NLP · reasoning"]]},
+{r:11,id:"umich",n:"University of Michigan",c:"Ann Arbor, MI",prog:"MSCSE",f:["ML","NLP","Vision"],t:60000,d:"2027-01-15",dn:"Intl deadline",p:"https://cse.engin.umich.edu/academics/graduate/",note:"Large, well-rounded program; strong auto/robotics industry ties.",profs:[["Honglak Lee","Deep learning · representation learning"],["Rada Mihalcea","NLP · computational social science"]]},
+{r:12,id:"columbia",n:"Columbia University",c:"New York, NY",prog:"MSCS",f:["ML","NLP","Vision"],t:80000,d:"2027-02-15",dn:"Final round",p:"https://www.cs.columbia.edu/education/ms/",note:"ML track; NYC finance + startup market. Larger cohort = better admit odds than peers.",profs:[["Richard Zemel","Machine learning · fairness"],["Carl Vondrick","Computer vision · self-supervision"]]},
+{r:13,id:"ucla",n:"UCLA",c:"Los Angeles, CA",prog:"MSCS",f:["ML","NLP","Vision"],t:40000,d:"2026-12-15",dn:"Single deadline",p:"https://grad.ucla.edu/admissions/",note:"Strong ML theory group; thesis and comprehensive-exam paths.",profs:[["Kai-Wei Chang","NLP · trustworthy LLMs"],["Cho-Jui Hsieh","Scalable ML · optimization"]]},
+{r:14,id:"ucsd",n:"UC San Diego",c:"San Diego, CA",prog:"MSCS",f:["ML","Data science","Vision"],t:40000,d:"2026-12-20",dn:"Single deadline",p:"https://cse.ucsd.edu/graduate/admissions",note:"Big AI faculty bench; also a separate MS in Data Science (HDSI).",profs:[["Julian McAuley","Recommender systems · NLP"],["Hao Su","3D vision · embodied AI"]]},
+{r:15,id:"umd",n:"University of Maryland",c:"College Park, MD",prog:"MSCS",f:["NLP","Vision","ML security"],t:45000,d:"2027-01-15",dn:"Intl deadline",p:"https://gradschool.umd.edu/admissions",note:"CLIP lab is a top NLP group; DC-area AI policy and defense employers.",profs:[["Hal Daumé III","NLP · responsible AI"],["Tom Goldstein","Adversarial ML · efficient training"]]},
+{r:16,id:"harvard",n:"Harvard University",c:"Cambridge, MA",prog:"MS CSE (SEAS)",f:["ML","AI for society"],t:65000,d:"2026-12-15",dn:"Single deadline",p:"https://gsas.harvard.edu/admissions",note:"CS masters is small (SEAS CSE); brand + Boston ecosystem.",profs:[["Finale Doshi-Velez","Interpretable ML · healthcare"],["Milind Tambe","AI for social good · multiagent"]]},
+{r:17,id:"upenn",n:"University of Pennsylvania",c:"Philadelphia, PA",prog:"MSE CIS / MCIT",f:["ML","NLP","Vision","Robotics"],t:75000,d:"2027-02-01",dn:"Final round",p:"https://gradadm.seas.upenn.edu/",note:"MSE-AI degree launched recently; MCIT accepts non-CS backgrounds too.",profs:[["Chris Callison-Burch","NLP · LLM applications"],["René Vidal","Vision · ML foundations"]]},
+{r:18,id:"wisc",n:"UW–Madison",c:"Madison, WI",prog:"MSCS (PMP)",f:["ML","Databases","Systems"],t:35000,d:"2026-12-15",dn:"Intl deadline",p:"https://www.cs.wisc.edu/graduate/",note:"Professional MS is coursework-based and comparatively affordable for the rank.",profs:[["Jerry Zhu","Machine learning · machine teaching"],["Sharon Li","OOD detection · ML safety"]]},
+{r:19,id:"caltech",n:"Caltech",c:"Pasadena, CA",prog:"PhD-track",f:["ML theory","Vision","RL"],t:null,d:"2026-12-15",dn:"PhD-track deadline",p:"https://www.gradoffice.caltech.edu/admissions",note:"No terminal MS in CS for external applicants — PhD route only.",profs:[["Yisong Yue","ML · sequential decision making"],["Anima Anandkumar","Tensor methods · AI for science"]]},
+{r:20,id:"usc",n:"USC",c:"Los Angeles, CA",prog:"MSCS",f:["AI","NLP","Vision","Data science"],t:70000,d:"2027-01-15",dn:"Intl deadline",p:"https://www.cs.usc.edu/academic-programs/masters/",note:"Large intl cohort, AI specialization; ISI is a major NLP research institute.",profs:[["Xiang Ren","NLP · knowledge reasoning"],["Yan Liu","ML · time series, healthcare"]]},
+{r:21,id:"yale",n:"Yale University",c:"New Haven, CT",prog:"MSCS",f:["ML","NLP","Comp bio"],t:50000,d:"2026-12-15",dn:"Single deadline",p:"https://gsas.yale.edu/admissions",note:"Smaller CS dept, rapidly hiring in AI; strong ML-for-science angle.",profs:[["Smita Krishnaswamy","ML for biology · geometric DL"],["Arman Cohan","NLP · long-document LLMs"]]},
+{r:22,id:"purdue",n:"Purdue University",c:"West Lafayette, IN",prog:"MSCS",f:["ML","NLP","Security"],t:50000,d:"2027-01-05",dn:"Intl deadline",p:"https://www.cs.purdue.edu/graduate/",note:"Strong systems + growing AI faculty; big engineering brand.",profs:[["Dan Goldwasser","NLP · computational social science"],["Bruno Ribeiro","Graph neural networks"]]},
+{r:23,id:"nyu",n:"NYU (Courant / Tandon)",c:"New York, NY",prog:"MSCS",f:["Deep learning","NLP","Vision"],t:75000,d:"2027-02-01",dn:"Final round",p:"https://cs.nyu.edu/home/master/",note:"CILVR lab is a deep-learning powerhouse; two schools offer MSCS (Courant, Tandon).",profs:[["Kyunghyun Cho","Deep learning · NLP"],["He He","NLP · trustworthy LLMs"]]},
+{r:24,id:"umass",n:"UMass Amherst",c:"Amherst, MA",prog:"MSCS",f:["NLP","IR","ML"],t:35000,d:"2026-12-20",dn:"Intl deadline",p:"https://www.cics.umass.edu/admissions",note:"CIICS is top-10 in NLP/IR research despite mid-20s overall rank — great value.",profs:[["Andrew McCallum","NLP · information extraction"],["Subhransu Maji","Computer vision"]]},
+{r:25,id:"northwestern",n:"Northwestern University",c:"Evanston, IL",prog:"MSCS",f:["AI","HCI","Data science"],t:65000,d:"2027-02-01",dn:"Final round",p:"https://www.mccormick.northwestern.edu/computer-science/",note:"Smaller program, Chicago market; strong human-centered AI.",profs:[["Doug Downey","NLP · scientific literature AI"],["Kristian Hammond","Applied AI · narrative generation"]]},
+{r:26,id:"duke",n:"Duke University",c:"Durham, NC",prog:"MSCS",f:["Interpretable ML","NLP","Vision"],t:75000,d:"2027-01-15",dn:"Intl deadline",p:"https://gradschool.duke.edu/admissions/",note:"Research Triangle; Rudin's interpretable-ML group is world-leading.",profs:[["Cynthia Rudin","Interpretable ML"],["Bhuwan Dhingra","NLP · retrieval-augmented LLMs"]]},
+{r:27,id:"jhu",n:"Johns Hopkins University",c:"Baltimore, MD",prog:"MSCS",f:["NLP","Speech","ML for health"],t:70000,d:"2027-02-01",dn:"Final round",p:"https://www.cs.jhu.edu/graduate-studies/",note:"CLSP is one of the oldest and best speech/NLP centers.",profs:[["Benjamin Van Durme","NLP · semantics, LLM evaluation"],["Mark Dredze","NLP · public health"]]},
+{r:28,id:"brown",n:"Brown University",c:"Providence, RI",prog:"ScM CS",f:["NLP","Robotics","HCI"],t:75000,d:"2027-02-01",dn:"Final round",p:"https://cs.brown.edu/degrees/masters/",note:"Small, flexible ScM; strong grounding-language-in-robotics groups.",profs:[["Ellie Pavlick","NLP · LLM understanding"],["Stefanie Tellex","Robotics · language grounding"]]},
+{r:29,id:"rice",n:"Rice University",c:"Houston, TX",prog:"MCS",f:["ML systems","Data science","NLP"],t:60000,d:"2027-01-15",dn:"Intl deadline",p:"https://csweb.rice.edu/academics/graduate-programs",note:"Small classes, Houston energy/med market; strong ML-systems group.",profs:[["Anshumali Shrivastava","Efficient ML · hashing"],["Xia (Ben) Hu","AutoML · LLM efficiency"]]},
+{r:30,id:"unc",n:"UNC Chapel Hill",c:"Chapel Hill, NC",prog:"MSCS",f:["NLP","Multimodal","Vision"],t:40000,d:"2026-12-15",dn:"Intl deadline",p:"https://cs.unc.edu/graduate/",note:"Bansal's MURGe-Lab is a top multimodal-NLP group; Research Triangle jobs.",profs:[["Mohit Bansal","Multimodal NLP · LLMs"],["Snigdha Chaturvedi","NLP · narrative understanding"]]},
+{r:31,id:"osu",n:"Ohio State University",c:"Columbus, OH",prog:"MSCS",f:["NLP","LLM agents","Vision"],t:40000,d:"2026-12-15",dn:"Intl deadline",p:"https://cse.osu.edu/grad",note:"Fast-rising NLP group (LLM agents); Columbus is a growing tech hub — Intel fabs nearby.",profs:[["Yu Su","LLM agents · grounding"],["Huan Sun","NLP · code + data agents"]]},
+{r:32,id:"uci",n:"UC Irvine",c:"Irvine, CA",prog:"MSCS / MDS",f:["ML","NLP","Data science"],t:40000,d:"2027-01-15",dn:"Intl deadline",p:"https://www.ics.uci.edu/grad/admissions/",note:"Strong probabilistic-ML tradition; SoCal tech market.",profs:[["Padhraic Smyth","Probabilistic ML"],["Sameer Singh","NLP · LLM robustness"]]},
+{r:33,id:"uva",n:"University of Virginia",c:"Charlottesville, VA",prog:"MSCS",f:["NLP","ML for health","Data mining"],t:35000,d:"2027-02-01",dn:"Intl deadline",p:"https://engineering.virginia.edu/departments/computer-science",note:"Good funding culture; DC-corridor employers.",profs:[["Yangfeng Ji","NLP · text generation"],["Aidong Zhang","ML · bioinformatics"]]},
+{r:34,id:"ucdavis",n:"UC Davis",c:"Davis, CA",prog:"MSCS",f:["NLP","ML","Databases"],t:40000,d:"2027-01-15",dn:"Intl deadline",p:"https://cs.ucdavis.edu/graduate-program",note:"Near Sacramento + 1.5h to Bay Area; growing NLP faculty.",profs:[["Muhao Chen","NLP · knowledge & factuality"],["Ian Davidson","Constrained clustering · fair ML"]]},
+{r:35,id:"psu",n:"Penn State",c:"University Park, PA",prog:"MSCSE",f:["IR","NLP","Data mining"],t:45000,d:"2026-12-15",dn:"Intl deadline",p:"https://www.eecs.psu.edu/students/graduate/",note:"Long IR/data-mining tradition (CiteSeer heritage).",profs:[["C. Lee Giles","Information extraction · scholarly big data"],["Rui Zhang","NLP · text-to-SQL, summarization"]]},
+{r:36,id:"umn",n:"University of Minnesota",c:"Minneapolis, MN",prog:"MSCS",f:["AI","Robotics","NLP"],t:40000,d:"2026-12-15",dn:"Intl deadline",p:"https://www.cs.umn.edu/academics/graduate",note:"Affordable Big-Ten option; UnitedHealth/Target HQ market.",profs:[["Maria Gini","Multi-robot systems · AI"],["Dongyeop Kang","NLP · human-centered LLMs"]]},
+{r:37,id:"neu",n:"Northeastern University",c:"Boston, MA",prog:"MSCS (Khoury)",f:["AI","ML","Data science"],t:63000,d:"2027-01-15",dn:"Intl deadline",p:"https://graduate.northeastern.edu/apply/",note:"Co-op = 4–8 months paid US work experience baked into the degree.",profs:[["Byron Wallace","NLP · ML for health"],["Jennifer Dy","ML · interpretable models"]]},
+{r:38,id:"bu",n:"Boston University",c:"Boston, MA",prog:"MSCS",f:["Vision","ML","NLP"],t:65000,d:"2027-02-01",dn:"Final round",p:"https://www.bu.edu/cs/masters/",note:"Strong vision group; Boston AI job market.",profs:[["Kate Saenko","Vision · multimodal, domain adaptation"],["Bryan Plummer","Vision-language models"]]},
+{r:39,id:"ucsb",n:"UC Santa Barbara",c:"Santa Barbara, CA",prog:"MSCS",f:["NLP","ML","Data science"],t:35000,d:"2026-12-15",dn:"Single deadline",p:"https://www.cs.ucsb.edu/education/grad",note:"Top NLP group for its size; UC pricing.",profs:[["William Wang","NLP · LLM reasoning"],["Shiyu Chang","ML robustness · efficiency"]]},
+{r:40,id:"stonybrook",n:"Stony Brook University",c:"Stony Brook, NY",prog:"MSCS",f:["NLP","Data science","Algorithms"],t:32000,d:"2027-01-15",dn:"Intl deadline",p:"https://www.cs.stonybrook.edu/students/Graduate-Studies",note:"SUNY pricing, ~1.5h from NYC; strong NLP + algorithms.",profs:[["Steven Skiena","Data science · algorithms"],["Niranjan Balasubramanian","NLP · efficient reasoning"]]},
+{r:41,id:"rutgers",n:"Rutgers University",c:"New Brunswick, NJ",prog:"MSCS",f:["ML","Vision","Rec systems"],t:40000,d:"2027-02-01",dn:"Intl deadline",p:"https://www.cs.rutgers.edu/academics/graduate",note:"NYC-adjacent; strong vision/medical-imaging group.",profs:[["Dimitris Metaxas","Vision · medical imaging"],["Yongfeng Zhang","Recommender systems · LLM agents"]]},
+{r:42,id:"asu",n:"Arizona State University",c:"Tempe, AZ",prog:"MCS / MSCS",f:["AI","Planning","Data mining"],t:56000,d:"2026-12-31",dn:"Priority; final Apr",p:"https://admission.asu.edu/graduate/apply",note:"Kambhampati's group is a leading voice on LLM planning/reasoning.",profs:[["Subbarao Kambhampati","AI planning · LLM reasoning"],["Huan Liu","Data mining · social computing"]]},
+{r:43,id:"ncsu",n:"NC State University",c:"Raleigh, NC",prog:"MCS",f:["AI","SE + ML","Multiagent"],t:62000,d:"2027-03-01",dn:"Priority round",p:"https://grad.ncsu.edu/admissions/apply/",note:"Research Triangle; strong software-engineering-meets-ML faculty.",profs:[["Munindar Singh","Multiagent systems · AI ethics"],["Dongkuan Xu","Efficient LLMs · AutoML"]]},
+{r:44,id:"cuboulder",n:"CU Boulder",c:"Boulder, CO",prog:"MSCS",f:["NLP","Vision","HCI"],t:45000,d:"2027-01-15",dn:"Intl deadline",p:"https://www.colorado.edu/cs/academics/graduate-programs",note:"Denver-Boulder tech corridor; accessible cohort size.",profs:[["Maria Leonor Pacheco","NLP · neuro-symbolic"],["Danna Gurari","Vision · accessibility"]]},
+{r:45,id:"utd",n:"UT Dallas",c:"Richardson, TX",prog:"MSCS",f:["NLP","ML","Intelligent systems"],t:50000,d:"2027-01-15",dn:"Intl priority; final Mar",p:"https://graduate-admissions.utdallas.edu/",note:"Large intl cohort, DFW market; realistic admit for a 305 profile.",profs:[["Vincent Ng","NLP · coreference, discourse"],["Rishabh Iyer","Submodular ML · data subset selection"]]},
+{r:46,id:"vt",n:"Virginia Tech",c:"Blacksburg / Alexandria, VA",prog:"MSCS",f:["Data mining","NLP","Security"],t:40000,d:"2027-01-15",dn:"Intl deadline",p:"https://website.cs.vt.edu/Graduate.html",note:"New Innovation Campus in DC metro focused on AI/ML masters.",profs:[["Naren Ramakrishnan","Data mining · forecasting"],["Tu Vu","NLP · instruction tuning"]]},
+{r:47,id:"utah",n:"University of Utah",c:"Salt Lake City, UT",prog:"MSCS",f:["NLP","Vision","Graphics"],t:30000,d:"2026-12-15",dn:"Intl deadline",p:"https://www.cs.utah.edu/graduate/",note:"Silicon Slopes startups; strong NLP duo; low cost for the rank.",profs:[["Vivek Srikumar","NLP · structured prediction"],["Ana Marasović","NLP · explainability"]]},
+{r:48,id:"pitt",n:"University of Pittsburgh",c:"Pittsburgh, PA",prog:"MSCS",f:["NLP","AI for education","ML"],t:50000,d:"2027-01-15",dn:"Intl deadline",p:"https://www.sci.pitt.edu/admissions",note:"Next door to CMU's ecosystem at half the price; strong ed-tech AI.",profs:[["Diane Litman","NLP · educational AI"],["Adriana Kovashka","Vision · ads & persuasion"]]},
+{r:49,id:"ufl",n:"University of Florida",c:"Gainesville, FL",prog:"MSCS",f:["AI","Graph ML","Data science"],t:30000,d:"2027-02-01",dn:"Intl deadline",p:"https://www.cise.ufl.edu/academics/grad/admissions",note:"Huge NVIDIA-backed AI push (HiPerGator supercomputer) + low tuition.",profs:[["Daisy Zhe Wang","Knowledge bases · probabilistic data"],["My T. Thai","Graph ML · trustworthy AI"]]},
+{r:50,id:"buffalo",n:"SUNY Buffalo",c:"Buffalo, NY",prog:"MSCS",f:["AI","NLP","Vision"],t:47000,d:"2027-02-01",dn:"Intl deadline",p:"https://grad.buffalo.edu/apply.html",note:"Realistic admit for a 305 profile; national AI institute for exceptional education.",profs:[["Rohini Srihari","NLP · conversational AI"],["Jinjun Xiong","AI systems · edge AI"]]},
+];
+
+/* value picks outside the research top-50 */
+const VALUE = [
+{id:"csueb",n:"Cal State East Bay",c:"Hayward, CA",t:20000,f:["Software Eng","Data Science"],d:"2027-03-01",dn:"Space-limited",p:"https://www.csueastbay.edu/admissions/",why:"Bay Area location at CSU pricing — internship access beats the rank."},
+{id:"utep",n:"UT El Paso",c:"El Paso, TX",t:21000,f:["AI","Cybersecurity"],d:"2027-03-01",dn:"Rolling",p:"https://www.utep.edu/graduate/",why:"R1 research status at the lowest UT-system cost."},
+{id:"wsu",n:"Wichita State University",c:"Wichita, KS",t:22000,f:["ML","Software Eng"],d:"2027-02-01",dn:"Rolling priority",p:"https://www.wichita.edu/admissions/graduate/",why:"Lowest cost per credit on this page."},
+{id:"txst",n:"Texas State University",c:"San Marcos, TX",t:24000,f:["AI/ML","Data Mining"],d:"2027-03-15",dn:"Intl deadline",p:"https://www.gradcollege.txst.edu/apply.html",why:"Between Austin and San Antonio tech corridors."},
+{id:"unt",n:"University of North Texas",c:"Denton, TX",t:28000,f:["AI","Data Science"],d:"2027-03-01",dn:"Intl deadline",p:"https://tgs.unt.edu/",why:"Tier-1 research school with DFW market access."},
+];
+
+/* per-school admit probability (%) for a GRE 305 / Q160 / GPA 8.2 / 4-yr-SWE profile,
+   and exams required with competitive scores.
+   v:1 = GRE policy verified on the university's own site in July 2026 (gd = per-program detail);
+   v:0 = estimate from recent cycles — confirm on the portal before applying. */
+const EXTRA = {
+mit:{prob:2,ex:"GRE not required · TOEFL 100 / IELTS 7.0",v:0},
+cmu:{prob:3,ex:"GRE varies by program · TOEFL 102 / IELTS 7.5",v:1,gd:"MSCS: GRE strongly recommended, esp. without strong math evidence · MS in ML: GRE optional · MSAII: optional · scores must be <5 yrs old; per-program policy set individually"},
+stanford:{prob:3,ex:"GRE not considered · TOEFL 100",v:1,gd:"MSCS: GRE not required and not considered for MS or PhD applicants — omitting it carries no penalty"},
+berkeley:{prob:5,ex:"GRE optional · TOEFL 90 / IELTS 7.0",v:0},
+uiuc:{prob:15,ex:"GRE not required · TOEFL 103 / IELTS 7.5",v:1,gd:"Professional MCS (on-campus and online): no GRE required · recommended GPA 3.2+/4.0 · online MCS same policy"},
+gatech:{prob:12,ex:"GRE optional · TOEFL 100 / IELTS 7.5",v:1,gd:"MSCS: GRE not required, considered if submitted — helpful if your degree is unrelated or 10+ yrs old · OMSCS (online): no GRE · TOEFL min 100, IELTS 7.5 overall"},
+uw:{prob:5,ex:"GRE not required · TOEFL 92 / IELTS 7.0",v:0},
+cornell:{prob:8,ex:"GRE optional · comp ~320 · TOEFL 100 / IELTS 7.5",v:0},
+princeton:{prob:2,ex:"GRE optional · TOEFL 100 / IELTS 8.0",v:0},
+utaustin:{prob:6,ex:"GRE optional · comp ~320 · TOEFL 79 / IELTS 6.5",v:0},
+umich:{prob:8,ex:"GRE not required · TOEFL 100 / IELTS 7.0",v:0},
+columbia:{prob:15,ex:"GRE not required ('26 cycle) · TOEFL 100 / IELTS 7.5",v:1,gd:"MS CS: GRE not required for the 2026 cycle, no penalty for omitting · when submitted, admitted avg ≈ Q163 / V155 — your Q160 is close, V145 argues for omitting"},
+ucla:{prob:7,ex:"GRE optional · comp ~320 · TOEFL 87 / IELTS 7.0",v:0},
+ucsd:{prob:10,ex:"GRE optional · comp ~318 · TOEFL 85 / IELTS 7.0",v:0},
+umd:{prob:12,ex:"GRE optional · comp ~315 · TOEFL 96 / IELTS 7.0",v:0},
+harvard:{prob:4,ex:"GRE optional · TOEFL 100 / IELTS 7.5",v:1,gd:"SEAS MS CSE: GRE optional — holistic review; demonstrated computational ability (courses, research, professional work) weighs more than test scores"},
+upenn:{prob:12,ex:"GRE optional · comp ~318 · TOEFL 100 / IELTS 7.5",v:0},
+wisc:{prob:10,ex:"GRE optional · comp ~315 · TOEFL 92 / IELTS 7.0",v:0},
+caltech:{prob:1,ex:"GRE not accepted · TOEFL 100",v:0},
+usc:{prob:25,ex:"GRE not reviewed (2026–27) · TOEFL 90 / IELTS 6.5",v:1,gd:"All Viterbi MS tracks (MS CS, CS–Data Science, CS–Scientists & Engineers): GRE not required for 2026 and 2027 cycles; submitted scores are not reviewed"},
+yale:{prob:8,ex:"GRE optional · TOEFL 100 / IELTS 7.0",v:0},
+purdue:{prob:15,ex:"GRE optional · comp ~315 · TOEFL 88 / IELTS 6.5",v:0},
+nyu:{prob:18,ex:"GRE optional · comp ~315 · TOEFL 100 / IELTS 7.0",v:0},
+umass:{prob:15,ex:"GRE optional · comp ~312 · TOEFL 90 / IELTS 6.5",v:0},
+northwestern:{prob:15,ex:"GRE optional · comp ~315 · TOEFL 100 / IELTS 7.0",v:0},
+duke:{prob:12,ex:"GRE optional · comp ~318 · TOEFL 100 / IELTS 7.0",v:0},
+jhu:{prob:18,ex:"GRE not required · TOEFL 100 / IELTS 7.0",v:0},
+brown:{prob:12,ex:"GRE optional · TOEFL 100 / IELTS 7.0",v:0},
+rice:{prob:18,ex:"GRE optional · comp ~315 · TOEFL 90 / IELTS 7.0",v:0},
+unc:{prob:15,ex:"GRE optional · comp ~312 · TOEFL 90 / IELTS 7.0",v:0},
+osu:{prob:20,ex:"GRE optional · comp ~310 · TOEFL 79 / IELTS 7.0",v:0},
+uci:{prob:20,ex:"GRE optional · comp ~312 · TOEFL 80 / IELTS 7.0",v:0},
+uva:{prob:25,ex:"GRE optional · comp ~310 · TOEFL 90 / IELTS 7.0",v:0},
+ucdavis:{prob:25,ex:"GRE optional · comp ~310 · TOEFL 80 / IELTS 7.0",v:0},
+psu:{prob:25,ex:"GRE required (MS) · comp ~310 · TOEFL 80 / IELTS 6.5",v:1,gd:"MS CSE: GRE required for ALL MS/MEng applicants (ETS code 2660) · PhD no longer requires it · 3 LORs required"},
+umn:{prob:25,ex:"GRE optional · comp ~310 · TOEFL 79 / IELTS 6.5",v:0},
+neu:{prob:40,ex:"GRE optional · comp ~308 · TOEFL 100 / IELTS 7.5",v:0},
+bu:{prob:30,ex:"GRE optional · comp ~312 · TOEFL 90 / IELTS 7.0",v:0},
+ucsb:{prob:20,ex:"GRE optional · comp ~315 · TOEFL 80 / IELTS 7.0",v:0},
+stonybrook:{prob:35,ex:"GRE required for intl · comp ~308 · TOEFL 90",v:1,gd:"MSCS: GRE required for international applicants (optional for domestic) · official scores via ETS code 2548 · holistic review — weaker scores can be offset elsewhere"},
+rutgers:{prob:30,ex:"GRE optional · comp ~310 · TOEFL 83 / IELTS 7.0",v:0},
+asu:{prob:55,ex:"GRE optional · comp ~305 · TOEFL 80 / IELTS 6.5",v:0},
+ncsu:{prob:30,ex:"GRE optional · comp ~310 · TOEFL 80 / IELTS 6.5",v:0},
+cuboulder:{prob:35,ex:"GRE optional · comp ~308 · TOEFL 75 / IELTS 6.5",v:0},
+utd:{prob:60,ex:"GRE required (from Spring '26) · comp ~308 · TOEFL 80",v:1,gd:"MSCS: GRE reinstated for Spring 2026 and beyond · competitive combined ~308+ (your 305 is near the bar — Q160 helps) · min 3.0 GPA in last 60 credit hours · TOEFL 80+"},
+vt:{prob:30,ex:"GRE optional · comp ~310 · TOEFL 80 / IELTS 6.5",v:0},
+utah:{prob:40,ex:"GRE optional · comp ~305 · TOEFL 90 / IELTS 6.5",v:0},
+pitt:{prob:40,ex:"GRE optional · comp ~308 · TOEFL 90 / IELTS 7.0",v:0},
+ufl:{prob:35,ex:"GRE optional · TOEFL 80 / IELTS 6.0",v:1,gd:"CISE MS: GRE optional — if submitted, V≥140 expected (your V145 clears it) · typical admit GPA 3.3+ · TOEFL 80"},
+buffalo:{prob:55,ex:"GRE optional · TOEFL 79 / IELTS 6.5",v:1,gd:"MS CS: GRE optional for both MS and PhD · avg admit GPA ~3.4 · 2 LORs · intl applicants need English proficiency proof"},
+};
+
+/* graduate programs per university across the target course areas.
+   Each entry: [areas, program name, requirement]. "✓" = verified on the university site (Jul 2026);
+   otherwise dept-level policy from the Exams column applies — confirm per program on the portal. */
+const AREAS = {AI:"Artificial Intelligence",CV:"Computer Vision",AML:"Applied ML",DS:"Data Science",CS:"Computer Science",DE:"Data Engineering",DML:"Distributed ML",NLP:"NLP",ANLP:"Advanced NLP"};
+const PROGS = {
+mit:[[["CS"],"MEng EECS","mostly internal MIT admits; external route is PhD"],[["AI","AML"],"EECS PhD — AI & Decision Making","GRE not required"],[["DS"],"MBAn — Business Analytics (Sloan)","GRE/GMAT accepted"]],
+cmu:[[["CS"],"MSCS","GRE strongly recommended ✓"],[["AML","DML"],"MS in Machine Learning (incl. 10-605 ML with Large Datasets)","GRE optional ✓"],[["AI"],"MSAII — AI & Innovation","GRE optional ✓"],[["DS","DE"],"MCDS — Computational Data Science","GRE recommended (LTI) — confirm"],[["NLP","ANLP"],"MIIS — Intelligent Information Systems (home of 11-711 Advanced NLP)","GRE recommended (LTI) — confirm"]],
+stanford:[[["CS","AI","CV"],"MSCS — AI specialization (CS229/CS231n/CS224n)","GRE not considered ✓"],[["DS"],"MS Statistics — Data Science","GRE policy differs — check Stats dept"]],
+berkeley:[[["CS","CV"],"MEng EECS — Visual Computing / ML tracks","GRE optional"],[["DS","DE"],"MIDS — Information & Data Science (online)","no GRE"]],
+uiuc:[[["CS","DML"],"Professional MCS (CS 425 Distributed Systems, CS 412)","no GRE ✓"],[["DS"],"MCS — Data Science track","no GRE ✓"],[["DS"],"MS Statistics — Analytics","GRE varies — check Stats"]],
+gatech:[[["CS","AML","CV"],"MSCS — ML / Computer Vision specializations","GRE optional ✓"],[["CS","DML"],"OMSCS (online) — big-data & ML systems courses","no GRE ✓"],[["DS"],"MS Analytics (blended)","GRE optional"]],
+uw:[[["CS","NLP","ANLP"],"MSCS PMP (CSE 517 Advanced NLP)","GRE not required"],[["DS"],"MS Data Science","GRE not required"]],
+cornell:[[["CS"],"MEng CS (Ithaca)","GRE optional"],[["AI","CS"],"Cornell Tech MEng (NYC)","GRE optional"],[["DS"],"MPS Information Science — Data Science","GRE optional"]],
+princeton:[[["CS","AI"],"MSE CS (funded, thesis)","GRE optional"]],
+utaustin:[[["CS","NLP"],"MSCS (on-campus)","GRE optional"],[["AI"],"MSAI (online, ~$10K)","no GRE"],[["DS"],"MSDS (online)","no GRE"]],
+umich:[[["CS","AML","CV"],"MSCSE — AI / ML areas","GRE not required"],[["DS","DE"],"MS Data Science","GRE not required"]],
+columbia:[[["CS","AML"],"MSCS — Machine Learning track","GRE not required '26 ✓"],[["NLP"],"MSCS — NLP track","GRE not required '26 ✓"],[["CV"],"MSCS — Vision & Graphics track","GRE not required '26 ✓"],[["DS"],"MS Data Science (DSI)","GRE optional"]],
+ucla:[[["CS","AI"],"MSCS — AI area","GRE optional"],[["DS","DE"],"MS Data Science in Engineering (online)","GRE optional"]],
+ucsd:[[["CS","CV","AML"],"MSCS — AI/ML/Vision groups","GRE optional"],[["DS"],"MS Data Science (HDSI)","GRE optional"],[["DE","DML"],"MAS Data Science & Engineering (working pros)","GRE optional"]],
+umd:[[["CS","AML","CV"],"MSCS — ML track","GRE optional"],[["NLP"],"MSCS — CLIP lab NLP courses","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+harvard:[[["CS","DS"],"MS/ME Computational Science & Engineering","GRE optional ✓"],[["DS"],"MS Data Science (SEAS + Statistics)","GRE optional ✓"]],
+upenn:[[["CS"],"MSE CIS","GRE optional"],[["CS"],"MCIT (non-CS backgrounds)","GRE optional"],[["DS"],"MSE Data Science","GRE optional"],[["AI"],"MSE in AI (new)","GRE optional"]],
+wisc:[[["CS"],"MSCS Professional (PMP)","GRE optional"],[["DS"],"MS Statistics — Data Science","GRE varies — check Stats"]],
+caltech:[[["CS","AI"],"PhD CMS only (no external terminal MS)","GRE not accepted"]],
+usc:[[["CS","AI"],"MSCS — AI specialization","GRE not reviewed ✓"],[["DS"],"MSCS — Data Science","GRE not reviewed ✓"],[["DS","DE"],"MS Applied Data Science","GRE not reviewed ✓"],[["CS"],"MSCS — Scientists & Engineers (career-changers)","GRE not reviewed ✓"]],
+yale:[[["CS"],"MSCS","GRE optional"],[["DS"],"MS Statistics & Data Science","GRE optional"]],
+purdue:[[["CS","NLP"],"MSCS","GRE optional"],[["AI"],"MS in AI (new)","GRE optional"]],
+nyu:[[["CS","AML"],"MSCS (Courant) — CILVR deep-learning courses","GRE optional"],[["DS","NLP"],"MS Data Science (CDS) — NLP electives","GRE optional"],[["CS"],"MSCS (Tandon)","GRE optional"]],
+umass:[[["CS","NLP","ANLP"],"MSCS (CS 685 Advanced NLP, IR)","GRE optional"],[["DS"],"MSCS — Data Science concentration","GRE optional"]],
+northwestern:[[["CS"],"MSCS","GRE optional"],[["AI"],"MS in Artificial Intelligence (MSAI)","GRE optional"],[["DS"],"MS Analytics","GRE optional"]],
+duke:[[["CS","AML"],"MSCS — interpretable-ML courses","GRE optional"],[["AI"],"MEng in AI","GRE optional"],[["DS"],"MIDS — Interdisciplinary Data Science","GRE optional"]],
+jhu:[[["CS","NLP"],"MSCS (CLSP speech & language courses)","GRE not required"],[["DS"],"MSE Data Science","GRE not required"]],
+brown:[[["CS","NLP"],"ScM Computer Science","GRE optional"],[["DS"],"ScM Data Science (DSI)","GRE optional"]],
+rice:[[["CS","DML"],"MCS — efficient/large-scale ML courses","GRE optional"],[["DS","DE"],"MDS — Data Science (on-campus/online)","GRE optional"]],
+unc:[[["CS","NLP","CV"],"MSCS — multimodal NLP (MURGe-Lab courses)","GRE optional"],[["DS"],"MS Information Science","GRE optional"]],
+osu:[[["CS","NLP","AI"],"MSCSE — LLM-agents faculty courses","GRE optional"]],
+uci:[[["CS","AML"],"MSCS","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+uva:[[["CS","NLP"],"MSCS","GRE optional"],[["DS"],"MS Data Science (School of Data Science)","GRE optional"]],
+ucdavis:[[["CS","NLP"],"MSCS","GRE optional"],[["DS"],"MS Statistics — Data Science track","GRE varies — check Stats"]],
+psu:[[["CS","NLP"],"MS CSE","GRE required ✓"],[["DS","DE"],"MS Data Analytics (online, World Campus)","GRE not required — confirm"]],
+umn:[[["CS","AI"],"MSCS","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+neu:[[["CS"],"MSCS (Khoury, co-op)","GRE optional"],[["AI"],"MS in Artificial Intelligence","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+bu:[[["CS","CV"],"MSCS — vision-language courses","GRE optional"],[["AI"],"MS in Artificial Intelligence","GRE optional"],[["DS"],"MS Data Science (CDS)","GRE optional"]],
+ucsb:[[["CS","NLP","AML"],"MSCS — NLP group courses","GRE optional"]],
+stonybrook:[[["CS","NLP","DS"],"MSCS — data-science & NLP courses","GRE required for intl ✓"],[["DS"],"MS Data Science (AMS dept)","GRE required for intl — confirm"]],
+rutgers:[[["CS","CV"],"MSCS — vision/medical imaging","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+asu:[[["CS","AI"],"MCS — AI concentration","GRE optional"],[["DS","DE"],"MS Data Science, Analytics & Engineering","GRE optional"]],
+ncsu:[[["CS","AI"],"MCS","GRE optional"],[["DS"],"MS Analytics (Institute for Advanced Analytics)","no GRE"]],
+cuboulder:[[["CS","NLP","CV"],"MSCS","GRE optional"],[["DS"],"MS Data Science (campus + online)","no GRE (online)"]],
+utd:[[["CS","AI"],"MSCS — Intelligent Systems track","GRE required ✓"],[["DS"],"MS Business Analytics & AI","GRE/GMAT — check Jindal school"]],
+vt:[[["CS","NLP"],"MSCS (Blacksburg + DC Innovation Campus)","GRE optional"],[["DE"],"MEng CS — data-centric courses (DC metro)","GRE optional"]],
+utah:[[["CS","NLP"],"MSCS — strong NLP faculty","GRE optional"],[["DS"],"MS Data Science","GRE optional"]],
+pitt:[[["CS","NLP"],"MSCS","GRE optional"],[["DS"],"MS Information Science — data analytics","GRE optional"]],
+ufl:[[["CS","AI"],"MSCS (HiPerGator AI supercomputer access)","GRE optional ✓"],[["DS","DE"],"MS Applied Data Science","GRE optional — confirm"]],
+buffalo:[[["CS","AI","NLP"],"MSCS — AI/ML focus","GRE optional ✓"],[["DS","DE"],"MS Engineering Science — Data Science","GRE optional — confirm"]],
+};
+
+const CHECK_ITEMS = [
+  ["sop","SOP tailored"],["lor1","LOR 1 requested"],["lor2","LOR 2 requested"],["lor3","LOR 3 requested"],
+  ["transcript","Transcripts"],["resume","Resume uploaded"],["projects","Projects / portfolio"],
+  ["gre","GRE score sent"],["english","TOEFL / IELTS sent"],["fee","Application fee paid"],
+];
+const STATUSES = [
+  ["not","Not started","s-not"],["prog","In progress","s-prog"],["sub","Submitted","s-sub"],
+  ["int","Interview","s-int"],["adm","Admitted","s-adm"],["rej","Rejected","s-rej"],
+];
+
+const KEY = "gradapp-2027-v2";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
+S.forEach(s => { state[s.id] = state[s.id] || {status:"not", notes:"", checks:{}}; });
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} };
+
+const $ = sel => document.querySelector(sel);
+const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const fmt$ = n => n==null ? "—" : "$" + n.toLocaleString("en-US");
+const doneCount = id => CHECK_ITEMS.filter(([k]) => state[id].checks[k]).length;
+const fmtDate = iso => new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+const daysTo = iso => Math.ceil((new Date(iso+"T12:00:00") - Date.now()) / 86400000);
+const probPill = id => {
+  const p = (EXTRA[id]||{}).prob ?? 0;
+  const cls = p < 10 ? "p-amb" : p < 30 ? "p-tgt" : p < 50 ? "p-info" : "p-safe";
+  const lbl = p < 5 ? "Very low" : p < 15 ? "Low" : p < 30 ? "Possible" : p < 50 ? "Fair" : "Good";
+  return `<span class="pill ${cls}">~${p}% · ${lbl}</span>`;
+};
+const deadlineCell = s => {
+  const d = daysTo(s.d);
+  const cls = d < 60 ? "p-amb" : d < 150 ? "p-tgt" : "p-acc";
+  return `<div class="deadline"><span class="mono">${fmtDate(s.d)}</span><br>
+    <span class="pill ${cls} days">${d>0 ? d+" days left" : "passed"}</span>
+    <div class="csub">${s.dn}</div></div>`;
+};
+const scholarUrl = (name, uni) =>
+  "https://scholar.google.com/citations?view_op=search_authors&mauthors=" + encodeURIComponent(name + " " + uni);
+
+/* ---- tabs ---- */
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x===b));
+  document.querySelectorAll("section").forEach(x => x.classList.toggle("on", x.id===b.dataset.tab));
+}));
+
+/* ---- overview ---- */
+function renderOverview(){
+  const total = S.length;
+  const submitted = S.filter(s => ["sub","int","adm"].includes(state[s.id].status)).length;
+  const inProg = S.filter(s => state[s.id].status==="prog").length;
+  const started = S.filter(s => state[s.id].status!=="not").length || 1;
+  const matDone = S.reduce((a,s) => a+doneCount(s.id), 0);
+  const next = [...S].sort((a,b) => a.d.localeCompare(b.d))[0];
+  $("#statTiles").innerHTML = `
+    <div class="stat"><div class="k">Ranked programs</div><div class="v">${total}</div>
+      <div class="d">full top-50 list, none filtered</div></div>
+    <div class="stat"><div class="k">Submitted</div><div class="v">${submitted}</div>
+      <div class="d">${inProg} in progress</div></div>
+    <div class="stat"><div class="k">Materials checked</div><div class="v">${matDone}</div>
+      <div class="d">across schools you're working on</div></div>
+    <div class="stat"><div class="k">First deadline</div><div class="v mono" style="font-size:19px">${fmtDate(next.d)}</div>
+      <div class="d">${next.n} · ${daysTo(next.d)} days out</div></div>`;
+  $("#timeline").innerHTML = [...S].sort((a,b) => a.d.localeCompare(b.d)).slice(0,12).map(s => `
+    <li><span class="date mono">${fmtDate(s.d)}</span>
+      <span class="who">#${s.r} ${s.n} <small>· ${s.dn}</small></span>${probPill(s.id)}</li>`).join("");
+}
+
+/* ---- top-50 table ---- */
+let activeArea = null;
+function renderAreaFilters(){
+  $("#areaFilters").innerHTML =
+    `<button class="fchip ${activeArea===null?"on":""}" data-area="">All areas</button>` +
+    Object.entries(AREAS).map(([k,label]) =>
+      `<button class="fchip ${activeArea===k?"on":""}" data-area="${k}">${label}</button>`).join("");
+  document.querySelectorAll("#areaFilters .fchip").forEach(b => b.addEventListener("click", () => {
+    activeArea = b.dataset.area || null;
+    renderAreaFilters(); renderColleges();
+  }));
+}
+const schoolAreas = id => [...new Set((PROGS[id]||[]).flatMap(p => p[0]))];
+function renderColleges(){
+  const shown = activeArea ? S.filter(s => schoolAreas(s.id).includes(activeArea)) : S;
+  $("#collegeTbl tbody").innerHTML = shown.map(s => {
+    const n = doneCount(s.id), tot = CHECK_ITEMS.length;
+    const progs = PROGS[s.id]||[];
+    return `
+    <tr>
+      <td class="rankno">${s.r}</td>
+      <td style="min-width:210px"><div class="cname">${s.n}</div><div class="csub">${s.c} · ${s.note}</div></td>
+      <td>${probPill(s.id)}</td>
+      <td class="csub" style="min-width:150px;max-width:190px">${(EXTRA[s.id]||{}).ex||"—"}
+        ${(EXTRA[s.id]||{}).v ? '<div><span class="pill p-safe" style="margin-top:3px">✓ verified on univ. site</span></div>' : '<div><span class="pill p-info" style="margin-top:3px">est. — verify</span></div>'}</td>
+      <td class="csub" style="white-space:nowrap">${s.prog}</td>
+      <td style="max-width:180px">${schoolAreas(s.id).map(a=>`<span class="course" title="${AREAS[a]}">${AREAS[a]}</span>`).join("")}
+        <div class="csub" style="margin-top:2px">${progs.length} program${progs.length>1?"s":""} — expand for reqs</div></td>
+      <td class="mono" style="font-weight:650">${fmt$(s.t)}${s.t?'<div class="csub" style="font-family:-apple-system,sans-serif">total, intl</div>':''}</td>
+      <td>${deadlineCell(s)}</td>
+      <td><a href="${s.p}" target="_blank" rel="noopener">Apply ↗</a></td>
+      <td>
+        <div class="bar"><i style="width:${100*n/tot}%"></i></div>
+        <div class="prog-lbl">${n}/${tot} ready</div>
+        <button class="btn" data-expand="${s.id}" aria-expanded="false">Checklist &amp; notes</button>
+      </td>
+    </tr>
+    <tr class="detail" id="d-${s.id}" hidden><td colspan="10">
+      <div class="detail-inner">
+        <div style="grid-column:1/-1"><h4>Programs &amp; requirements</h4>
+          ${progs.map(([areas,name,req]) => `
+          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--line)">
+            <span style="font-weight:650;font-size:13.5px">${name}</span>
+            ${areas.map(a=>`<span class="course">${AREAS[a]}</span>`).join("")}
+            <span class="csub" style="margin-left:auto">${req || "dept policy — see Exams column"}</span>
+          </div>`).join("")}
+        </div>
+        <div style="grid-column:1/-1"><h4>GRE requirement by program ${(EXTRA[s.id]||{}).v ? '<span class="pill p-safe">✓ verified on university site, Jul 2026</span>' : '<span class="pill p-info">estimated — confirm on portal</span>'}</h4>
+          <p style="margin:0;font-size:13.5px;max-width:100ch">${(EXTRA[s.id]||{}).gd || (EXTRA[s.id]||{}).ex || "See portal."}</p>
+        </div>
+        <div><h4>Application materials</h4>
+          <div class="checks">${CHECK_ITEMS.map(([k,label]) => `
+            <label><input type="checkbox" data-check="${s.id}:${k}" ${state[s.id].checks[k]?"checked":""}> ${label}</label>`).join("")}
+          </div>
+        </div>
+        <div><h4>Notes &amp; comments for this college</h4>
+          <textarea data-note="${s.id}" placeholder="Your comments — professor replies, fee waivers, SOP angle, doubts…">${esc(state[s.id].notes)}</textarea>
+        </div>
+      </div>
+    </td></tr>`;
+  }).join("");
+
+  document.querySelectorAll("[data-expand]").forEach(b => b.addEventListener("click", () => {
+    const row = document.getElementById("d-"+b.dataset.expand);
+    row.hidden = !row.hidden;
+    b.setAttribute("aria-expanded", String(!row.hidden));
+    b.textContent = row.hidden ? "Checklist & notes" : "Close";
+  }));
+  document.querySelectorAll("[data-check]").forEach(c => c.addEventListener("change", () => {
+    const [id,k] = c.dataset.check.split(":");
+    state[id].checks[k] = c.checked; save();
+    refreshProgress(id); renderOverview(); renderTracker();
+  }));
+  document.querySelectorAll("[data-note]").forEach(t => t.addEventListener("input", () => {
+    state[t.dataset.note].notes = t.value; save();
+    const other = document.querySelector(`[data-tnote="${t.dataset.note}"]`);
+    if (other) other.value = t.value;
+  }));
+}
+function refreshProgress(id){
+  const btn = document.querySelector(`[data-expand="${id}"]`);
+  if(!btn) return;
+  const cell = btn.parentElement;
+  const n = doneCount(id), tot = CHECK_ITEMS.length;
+  cell.querySelector(".bar i").style.width = (100*n/tot)+"%";
+  cell.querySelector(".prog-lbl").textContent = `${n}/${tot} ready`;
+}
+
+/* ---- professors ---- */
+function renderProfs(filter){
+  const q = (filter||"").trim().toLowerCase();
+  $("#profList").innerHTML = S.map(s => {
+    const rows = s.profs.filter(([name,area]) =>
+      !q || s.n.toLowerCase().includes(q) || name.toLowerCase().includes(q) || area.toLowerCase().includes(q));
+    if(!rows.length) return "";
+    return `<div class="uniblock">
+      <header><span class="rankno">#${s.r}</span><span class="cname">${s.n}</span>
+        <span class="csub">${s.c}</span>${probPill(s.id)}</header>
+      ${rows.map(([name,area]) => `
+      <div class="profrow">
+        <span class="pname">${name}</span>
+        <span class="parea">${area}</span>
+        <a href="${scholarUrl(name, s.n)}" target="_blank" rel="noopener">Scholar ↗</a>
+        <button class="btn primary" data-mail="${s.id}|${esc(name)}|${esc(area)}">Draft email</button>
+      </div>`).join("")}
+    </div>`;
+  }).join("") || '<p class="note">No matches — try a broader term.</p>';
+  document.querySelectorAll("[data-mail]").forEach(b => b.addEventListener("click", () => {
+    const [id,name,area] = b.dataset.mail.split("|");
+    openMail(S.find(x=>x.id===id), name, area);
+  }));
+}
+$("#profSearch").addEventListener("input", e => renderProfs(e.target.value));
+
+/* ---- email modal ---- */
+function emailText(s, name, area){
+  const last = name.split(" ").pop();
+  return `Subject: Prospective MS applicant (Fall 2027) — research assistance in ${area.split("·")[0].trim()}
+
+Dear Prof. ${last},
+
+I am Nikita Singh, a software engineer at American Express with four years of backend and applied-AI experience, and I am applying to the MS program at ${s.n} for Fall 2027. Your group's work in ${area.toLowerCase()} is the reason ${s.n} is high on my list.
+
+[Personalize this line before sending: name one specific recent paper of theirs from Google Scholar and say in one sentence what interested you or what you'd extend.]
+
+Some quick context on my background:
+- Built an agentic AI assistant (Llama-based) at Amex that automates case creation and processing for customer-care workflows.
+- Re-architected a high-volume demographic-fetching service with parallel processing, and led a JDK 21 migration across five repositories.
+- Certified in autonomous agents with LangChain and Hugging Face; comfortable with Java, Python, and production ML plumbing.
+
+If you anticipate taking MS students for research assistance, thesis supervision, or even unfunded project work in the coming year, I would be glad to contribute — I can start remotely before Fall 2027 if useful. My resume is attached, and I am happy to share code or project write-ups.
+
+Thank you for your time.
+
+Best regards,
+Nikita Singh
+nikitasingh18dec@gmail.com · +91 83187 21284
+linkedin.com/in/nikitasingh98`;
+}
+function openMail(s, name, area){
+  $("#mTitle").textContent = "Email — " + name + " (" + s.n + ")";
+  $("#mText").value = emailText(s, name, area);
+  $("#overlay").classList.add("on");
+  $("#mText").focus();
+}
+$("#mClose").addEventListener("click", () => $("#overlay").classList.remove("on"));
+$("#overlay").addEventListener("click", e => { if(e.target===e.currentTarget) e.currentTarget.classList.remove("on"); });
+document.addEventListener("keydown", e => { if(e.key==="Escape") $("#overlay").classList.remove("on"); });
+$("#mCopy").addEventListener("click", () => {
+  navigator.clipboard.writeText($("#mText").value).then(() => {
+    $("#mCopy").textContent = "Copied ✓";
+    setTimeout(() => $("#mCopy").textContent = "Copy email", 1600);
+  });
+});
+$("#mMailto").addEventListener("click", e => {
+  const t = $("#mText").value;
+  const nl = t.indexOf("\n");
+  const subject = t.slice(9, nl).trim();
+  const body = t.slice(nl+1).trim();
+  e.currentTarget.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+});
+
+/* ---- tracker ---- */
+function renderTracker(){
+  $("#trackTbl tbody").innerHTML = S.map(s => {
+    const st = state[s.id].status;
+    const n = doneCount(s.id), tot = CHECK_ITEMS.length;
+    const cls = (STATUSES.find(x=>x[0]===st)||STATUSES[0])[2];
+    return `<tr>
+      <td class="rankno">${s.r}</td>
+      <td><div class="cname">${s.n}</div><div class="csub">${s.c}</div></td>
+      <td><select class="status ${cls}" data-status="${s.id}" aria-label="Status for ${s.n}">
+        ${STATUSES.map(([v,l]) => `<option value="${v}" ${v===st?"selected":""}>${l}</option>`).join("")}
+      </select></td>
+      <td><div class="bar"><i style="width:${100*n/tot}%"></i></div><div class="prog-lbl">${n}/${tot} ready</div></td>
+      <td>${deadlineCell(s)}</td>
+      <td style="min-width:220px"><textarea data-tnote="${s.id}" style="min-height:44px" placeholder="Comments…" aria-label="Notes for ${s.n}">${esc(state[s.id].notes)}</textarea></td>
+    </tr>`;
+  }).join("");
+  document.querySelectorAll("[data-status]").forEach(sel => sel.addEventListener("change", () => {
+    state[sel.dataset.status].status = sel.value; save();
+    sel.className = "status " + (STATUSES.find(x=>x[0]===sel.value)||STATUSES[0])[2];
+    renderOverview();
+  }));
+  document.querySelectorAll("[data-tnote]").forEach(t => t.addEventListener("input", () => {
+    state[t.dataset.tnote].notes = t.value; save();
+    const other = document.querySelector(`[data-note="${t.dataset.tnote}"]`);
+    if (other) other.value = t.value;
+  }));
+}
+
+/* ---- best value ---- */
+function renderValue(){
+  $("#valueCards").innerHTML = VALUE.sort((a,b) => a.t - b.t).map((s,i) => `
+    <div class="vcard">
+      <span class="rank">Value pick #${i+1}</span>
+      <h3>${s.n}</h3>
+      <div class="price mono">${fmt$(s.t)} <small>est. total intl tuition</small></div>
+      <div class="meta">${s.c} · ${s.why}</div>
+      <div>${s.f.map(c=>`<span class="course">${c}</span>`).join("")}</div>
+      <div class="meta">Deadline ${fmtDate(s.d)} (${s.dn})</div>
+      <footer><span class="pill p-safe">Safe</span> <a href="${s.p}" target="_blank" rel="noopener">Admission portal ↗</a></footer>
+    </div>`).join("");
+}
+
+renderOverview(); renderAreaFilters(); renderColleges(); renderProfs(""); renderTracker(); renderValue();
+</script>
