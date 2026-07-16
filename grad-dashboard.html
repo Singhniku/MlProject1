@@ -186,6 +186,11 @@
     <span class="chip">B.Tech CSE · GPA <b>8.2</b>/10</span>
     <span class="chip">Focus: <b>AI · ML · DS · Neural Networks</b></span>
   </div>
+  <div class="chips">
+    <span class="chip" id="storageChip">…</span>
+    <button class="btn" id="expBtn" type="button">⬇ Export data</button>
+    <label class="btn" style="cursor:pointer">⬆ Import data<input type="file" id="impFile" accept="application/json" hidden></label>
+  </div>
 </header>
 
 <nav role="tablist">
@@ -463,9 +468,47 @@ const STATUSES = [
 
 const KEY = "gradapp-2027-v2";
 let state = {};
-try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
-S.forEach(s => { state[s.id] = state[s.id] || {status:"not", notes:"", checks:{}}; });
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} };
+let dbMode = false;   // true when the local SQLite server (server.py) is reachable
+const fillDefaults = () => S.forEach(s => { state[s.id] = state[s.id] || {status:"not", notes:"", checks:{}}; });
+
+let saveTimer;
+const save = () => {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+  if (dbMode){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      fetch("/api/state", {method:"PUT", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(state)}).catch(() => {});
+    }, 400);
+  }
+};
+
+function updateStorageChip(){
+  const el = document.getElementById("storageChip");
+  if (el) el.innerHTML = dbMode
+    ? "💾 Saved to <b>local DB</b> (gradapp.db) — survives every session"
+    : "Saved in <b>this browser</b> — use Export for a backup, or run server.py for a local DB";
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gradapp-tracking-backup.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importData(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (typeof data !== "object" || !data) throw new Error("bad");
+      state = data; fillDefaults(); save(); renderAll();
+    } catch(e) { alert("That file isn't a valid dashboard backup."); }
+  };
+  r.readAsText(file);
+}
 
 const $ = sel => document.querySelector(sel);
 const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
@@ -722,5 +765,28 @@ function renderValue(){
     </div>`).join("");
 }
 
-renderOverview(); renderAreaFilters(); renderColleges(); renderProfs(""); renderTracker(); renderValue();
+function renderAll(){
+  renderOverview(); renderAreaFilters(); renderColleges(); renderProfs($("#profSearch").value); renderTracker(); renderValue();
+  updateStorageChip();
+}
+
+(async function init(){
+  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
+  try {
+    const r = await fetch("/api/state", {cache:"no-store"});
+    if (r.ok){
+      const serverState = await r.json();
+      if (serverState && Object.keys(serverState).length) state = serverState;
+      dbMode = true;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+    }
+  } catch(e) { /* no local server (e.g. artifact) — browser storage only */ }
+  fillDefaults();
+  renderAll();
+  document.getElementById("expBtn").addEventListener("click", exportData);
+  document.getElementById("impFile").addEventListener("change", e => {
+    if (e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = "";
+  });
+})();
 </script>

@@ -24,7 +24,10 @@ Five tabs: Overview (stats + deadline timeline + profile advice) · Top 50 Colle
 - `PROGS` — keyed by school id: array of `[areas[], programName, requirement]`. Area codes map via `AREAS`: AI, CV, AML (Applied ML), DS, CS, DE (Data Eng), DML (Distributed ML), NLP, ANLP (Advanced NLP). Drives the area filter chips and the "Programs & requirements" block in each row's expand.
 - `VALUE` — 5 budget schools outside the top-50 (tuition < $30K total).
 - `CHECK_ITEMS` (10 materials: SOP, 3 LORs, transcripts, resume, projects, GRE/TOEFL sent, fee) and `STATUSES` (not/prog/sub/int/adm/rej).
-- User state persists in `localStorage` key **`gradapp-2027-v2`**: `{schoolId: {status, notes, checks}}`. Notes are two-way synced between the Top-50 expand textarea (`data-note`) and the Tracker textarea (`data-tnote`).
+- User state (`{schoolId: {status, notes, checks}}`) has two persistence layers, handled in `save()`/`init()`:
+  1. **Local SQLite DB (preferred)** — `python3 server.py` serves the dashboard at http://127.0.0.1:8500 with `GET/PUT /api/state` backed by `gradapp.db` (kv table, whole state as one JSON row; the DB file is gitignored). The page detects the API on load, shows a "Saved to local DB" chip, and debounce-saves (400 ms) every change. Sessions always resume with prior data, even if the browser storage is cleared.
+  2. **localStorage** key **`gradapp-2027-v2`** — fallback used automatically when there is no server (e.g. the published artifact, where CSP blocks fetch). Header has Export/Import JSON buttons to move data between the two.
+  Notes are two-way synced between the Top-50 expand textarea (`data-note`) and the Tracker textarea (`data-tnote`).
 
 ### Conventions / gotchas
 
