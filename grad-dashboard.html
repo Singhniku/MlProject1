@@ -197,6 +197,7 @@ input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
   <button class="on" data-tab="overview">Overview</button>
   <button data-tab="colleges">Top 50 Colleges</button>
   <button data-tab="profs">Professors &amp; Outreach</button>
+  <button data-tab="resume">Resume Modifier</button>
   <button data-tab="tracker">Application Tracker</button>
   <button data-tab="value">Best Under $30K</button>
 </nav>
@@ -239,6 +240,39 @@ input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
     <input class="search" id="profSearch" type="search" placeholder="Filter by university, professor, or area (e.g. NLP, vision, reinforcement)…" aria-label="Filter professors">
   </div>
   <div id="profList"></div>
+</section>
+
+<section id="resume">
+  <h2>Resume Modifier — ATS optimization</h2>
+  <p class="note">Paste your resume text and, ideally, the target job description. <b>Check ATS Score</b> runs instantly in your browser against real, documented ATS parsing rules (keyword match, action verbs, quantification, standard sections, contact info, length) — no scanner can promise a universal "100" against every company's proprietary system, so treat this as a rigorous compatibility estimate, not a guarantee. <b>Rewrite with AI</b> sends both to Claude through your local server to restructure and rephrase bullets (verb → tech → scope → outcome) and work in job-description keywords — it never invents metrics, employers, or skills. Needs an Anthropic API key in <code>.env</code> (set up by <code>./setup</code>) and only works when running locally, not in the shared artifact view.</p>
+
+  <div class="cols2">
+    <div class="panel">
+      <h4 style="margin:0 0 6px">Your resume text</h4>
+      <textarea id="resumeInput" style="min-height:220px" placeholder="Paste your resume text here (copy from Word/PDF/Google Docs)…"></textarea>
+    </div>
+    <div class="panel">
+      <h4 style="margin:0 0 6px">Target job description <span class="csub">(optional, improves scoring + rewrite)</span></h4>
+      <textarea id="jdInput" style="min-height:220px" placeholder="Paste the job posting text here…"></textarea>
+    </div>
+  </div>
+
+  <div class="toolrow" style="margin-top:14px">
+    <button class="btn primary" id="atsCheckBtn" type="button">Check ATS Score</button>
+    <button class="btn" id="aiRewriteBtn" type="button">✨ Rewrite with AI</button>
+    <span class="csub" id="rewriteStatus"></span>
+  </div>
+
+  <div id="atsScoreArea"></div>
+
+  <div class="panel" id="rewritePanel" hidden style="margin-top:14px">
+    <h4 style="margin:0 0 6px">AI-rewritten resume</h4>
+    <textarea id="rewriteOutput" style="min-height:320px"></textarea>
+    <div class="toolrow" style="margin-top:10px">
+      <button class="btn" id="copyRewriteBtn" type="button">Copy rewritten text</button>
+      <button class="btn" id="rescoreRewriteBtn" type="button">Re-check ATS score</button>
+    </div>
+  </div>
 </section>
 
 <section id="tracker">
@@ -745,6 +779,140 @@ linkedin.com/in/nikitasingh98`;
   },
 };
 
+/* ===== src/services/AtsAnalyzer.js ===== */
+// Client-side ATS-compatibility scorer. Scores against real, documented ATS parsing
+// behaviors (keyword matching, standard sections, quantified bullets, strong verbs,
+// contact info, length) rather than any single vendor's proprietary algorithm — no
+// scanner can guarantee a universal "100/100" against every company's ATS, so this is
+// framed as a compatibility estimate, not a guarantee.
+const WEAK_PHRASES = [
+  "responsible for", "worked on", "helped with", "was involved in",
+  "in charge of", "duties included", "tasked with", "assisted with",
+];
+const SECTION_HEADERS = ["experience", "education", "skills", "summary", "projects", "certifications"];
+const STOPWORDS = new Set([
+  "the","and","a","an","of","to","in","for","with","on","at","by","is","are","this","that",
+  "as","or","be","from","will","you","your","we","our","their","who","what","have","has",
+  "must","can","will","into","using","across","per","also","such","other","new",
+]);
+
+function tokenize(text) {
+  return (text.toLowerCase().match(/[a-z][a-z0-9+.#-]{1,}/g) || []).filter(
+    (w) => !STOPWORDS.has(w) && w.length > 2
+  );
+}
+
+function topKeywords(jobText, limit = 25) {
+  const freq = {};
+  tokenize(jobText).forEach((w) => (freq[w] = (freq[w] || 0) + 1));
+  return Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([w]) => w);
+}
+
+// @returns {score, maxScore, checks[], missingKeywords[], matchedKeywords[], wordCount}
+function analyzeResume(resumeText, jobText = "") {
+  const lower = resumeText.toLowerCase();
+  const lines = resumeText.split(/\r?\n/).filter((l) => l.trim());
+  const wordCount = tokenize(resumeText).length;
+  const checks = [];
+  let score = 0;
+
+  const hasEmail = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(resumeText);
+  const hasPhone = /(\+?\d[\d\-\s()]{7,}\d)/.test(resumeText);
+  const contactPts = (hasEmail ? 8 : 0) + (hasPhone ? 7 : 0);
+  score += contactPts;
+  checks.push({
+    label: "Contact info", pass: hasEmail && hasPhone, points: contactPts, max: 15,
+    detail: hasEmail && hasPhone ? "Email and phone number found." :
+      `Missing: ${[!hasEmail && "email", !hasPhone && "phone"].filter(Boolean).join(", ")}.`,
+  });
+
+  const foundSections = SECTION_HEADERS.filter((h) => lower.includes(h));
+  const sectionPts = Math.round((foundSections.length / SECTION_HEADERS.length) * 15);
+  score += sectionPts;
+  checks.push({
+    label: "Standard section headers", pass: foundSections.length >= 3, points: sectionPts, max: 15,
+    detail: `Found: ${foundSections.join(", ") || "none"}. ATS parsers key off standard headings like Experience, Education, and Skills.`,
+  });
+
+  const bulletLines = lines.filter((l) => /^[\s]*[-•*]/.test(l) || l.trim().length > 30);
+  const quantified = bulletLines.filter((l) => /\d/.test(l));
+  const quantPct = bulletLines.length ? quantified.length / bulletLines.length : 0;
+  const quantPts = Math.round(quantPct * 20);
+  score += quantPts;
+  checks.push({
+    label: "Quantified achievements", pass: quantPct >= 0.5, points: quantPts, max: 20,
+    detail: `${quantified.length}/${bulletLines.length || 0} bullet-like lines include a number or metric.`,
+  });
+
+  const weakHits = WEAK_PHRASES.filter((p) => lower.includes(p));
+  const weakPts = Math.max(0, 15 - weakHits.length * 4);
+  score += weakPts;
+  checks.push({
+    label: "Strong action verbs", pass: weakHits.length === 0, points: weakPts, max: 15,
+    detail: weakHits.length ? `Weak phrasing found: "${weakHits.join('", "')}" — replace with a specific action verb.` : "No weak filler phrases detected.",
+  });
+
+  const lengthOk = wordCount >= 250 && wordCount <= 900;
+  const lengthPts = lengthOk ? 10 : Math.max(0, 10 - Math.abs(wordCount < 250 ? 250 - wordCount : wordCount - 900) / 50);
+  score += lengthPts;
+  checks.push({
+    label: "Resume length", pass: lengthOk, points: Math.round(lengthPts), max: 10,
+    detail: `${wordCount} words (ATS-friendly range: roughly 250–900 words for a 1–2 page resume).`,
+  });
+
+  let keywordPts = 0, missing = [], matched = [];
+  if (jobText.trim()) {
+    const jdKeywords = topKeywords(jobText);
+    const resumeTokens = new Set(tokenize(resumeText));
+    matched = jdKeywords.filter((k) => resumeTokens.has(k));
+    missing = jdKeywords.filter((k) => !resumeTokens.has(k));
+    keywordPts = jdKeywords.length ? Math.round((matched.length / jdKeywords.length) * 25) : 0;
+    score += keywordPts;
+    checks.push({
+      label: "Job-description keyword match", pass: matched.length / Math.max(1, jdKeywords.length) >= 0.6,
+      points: keywordPts, max: 25,
+      detail: `${matched.length}/${jdKeywords.length} top job-description terms found in your resume. Missing: ${missing.slice(0, 12).join(", ") || "none"}.`,
+    });
+  } else {
+    checks.push({
+      label: "Job-description keyword match", pass: null, points: 0, max: 25,
+      detail: "Paste the target job description above to score keyword match — worth up to 25 of the 100 points, since real ATS ranking is always relative to a specific posting.",
+    });
+  }
+
+  return { score: Math.min(100, Math.round(score)), maxScore: 100, checks, missingKeywords: missing, matchedKeywords: matched, wordCount };
+}
+
+/* ===== src/services/ResumeRewriteService.js ===== */
+// Calls the local server's AI-rewrite endpoint (server.py -> Anthropic API using a key
+// from .env). Only works when the app is served locally with a configured API key —
+// the published Artifact has no server to call, so this fails with a clear message there.
+const ResumeRewriteService = {
+  async rewrite(resumeText, jobText) {
+    let res;
+    try {
+      res = await fetch("/api/resume/rewrite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeText, jobText }),
+      });
+    } catch (e) {
+      throw new Error("Couldn't reach the local server. Run ./setup (or python3 server.py) and open http://127.0.0.1:8500.");
+    }
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      /* non-JSON error body — data stays {} */
+    }
+    if (!res.ok) throw new Error(data.error || `AI rewrite failed (HTTP ${res.status}).`);
+    return data.rewritten;
+  },
+};
+
 /* ===== src/views/View.js ===== */
 // Base class for every view. Views own one region of the DOM and expose render();
 // state-aware views also implement onChange(change) to react to store events.
@@ -1046,6 +1214,83 @@ class EmailModalView extends View {
   }
 }
 
+/* ===== src/views/ResumeModifierView.js ===== */
+// Resume Modifier tab: paste resume (+ optional job description), get an instant
+// client-side ATS-compatibility score, and optionally send both to the local server
+// for an AI rewrite (restructures bullets, targets JD keywords, never invents facts).
+class ResumeModifierView extends View {
+  constructor() {
+    super(qs("#resume"));
+  }
+
+  init() {
+    qs("#atsCheckBtn").addEventListener("click", () => this.checkScore());
+    qs("#aiRewriteBtn").addEventListener("click", () => this.rewrite());
+    qs("#copyRewriteBtn").addEventListener("click", () => {
+      navigator.clipboard.writeText(qs("#rewriteOutput").value);
+      const b = qs("#copyRewriteBtn");
+      b.textContent = "Copied ✓";
+      setTimeout(() => (b.textContent = "Copy rewritten text"), 1500);
+    });
+    qs("#rescoreRewriteBtn").addEventListener("click", () => {
+      this.renderScore(analyzeResume(qs("#rewriteOutput").value, qs("#jdInput").value), true);
+    });
+  }
+
+  checkScore() {
+    const resumeText = qs("#resumeInput").value;
+    if (!resumeText.trim()) {
+      alert("Paste your resume text first.");
+      return;
+    }
+    this.renderScore(analyzeResume(resumeText, qs("#jdInput").value));
+  }
+
+  async rewrite() {
+    const resumeText = qs("#resumeInput").value;
+    if (!resumeText.trim()) {
+      alert("Paste your resume text first.");
+      return;
+    }
+    const status = qs("#rewriteStatus");
+    const btn = qs("#aiRewriteBtn");
+    btn.disabled = true;
+    status.textContent = "Rewriting with Claude…";
+    try {
+      const rewritten = await ResumeRewriteService.rewrite(resumeText, qs("#jdInput").value);
+      qs("#rewritePanel").hidden = false;
+      qs("#rewriteOutput").value = rewritten;
+      status.textContent = "Done — review before using; verify no facts were altered.";
+      this.renderScore(analyzeResume(rewritten, qs("#jdInput").value), true);
+    } catch (e) {
+      status.textContent = e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  renderScore(result, isRewrite = false) {
+    const cls = result.score >= 85 ? "p-safe" : result.score >= 60 ? "p-tgt" : "p-amb";
+    const borderColor = (c) => (c.pass === false ? "var(--bad)" : c.pass === null ? "var(--info)" : "var(--good)");
+    qs("#atsScoreArea").innerHTML = `
+      <div class="stat" style="max-width:260px;margin:14px 0">
+        <div class="k">${isRewrite ? "Rewritten " : ""}ATS compatibility score</div>
+        <div class="v"><span class="pill ${cls}" style="font-size:20px;padding:4px 14px">${result.score}/100</span></div>
+        <div class="d">estimate against documented ATS parsing rules — not a guarantee for any specific company's system</div>
+      </div>
+      <div class="panel">
+        ${result.checks
+          .map(
+            (c) => `
+          <div class="advice" style="border-left-color:${borderColor(c)}">
+            <b>${c.label}</b> — ${c.points}/${c.max} pts<br>${c.detail}
+          </div>`
+          )
+          .join("")}
+      </div>`;
+  }
+}
+
 /* ===== src/views/TrackerView.js ===== */
 // Application Tracker tab: status dropdown, materials progress, deadline, and an
 // editable notes column that stays in sync with the Top-50 tab via the store.
@@ -1143,6 +1388,7 @@ const colleges = new CollegesView(store);
 const professors = new ProfessorsView(emailModal);
 const tracker = new TrackerView(store);
 const value = new ValueView();
+const resumeModifier = new ResumeModifierView();
 const stateViews = [overview, colleges, tracker, value];
 
 function updateStorageChip() {
@@ -1180,6 +1426,7 @@ async function main() {
   new TabController().init();
   emailModal.init();
   professors.init(); // independent of tracking state
+  resumeModifier.init(); // independent of tracking state
 
   await store.init(); // load persisted state (remote DB wins if present)
 

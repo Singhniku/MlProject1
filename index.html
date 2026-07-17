@@ -28,6 +28,7 @@
   <button class="on" data-tab="overview">Overview</button>
   <button data-tab="colleges">Top 50 Colleges</button>
   <button data-tab="profs">Professors &amp; Outreach</button>
+  <button data-tab="resume">Resume Modifier</button>
   <button data-tab="tracker">Application Tracker</button>
   <button data-tab="value">Best Under $30K</button>
 </nav>
@@ -70,6 +71,39 @@
     <input class="search" id="profSearch" type="search" placeholder="Filter by university, professor, or area (e.g. NLP, vision, reinforcement)…" aria-label="Filter professors">
   </div>
   <div id="profList"></div>
+</section>
+
+<section id="resume">
+  <h2>Resume Modifier — ATS optimization</h2>
+  <p class="note">Paste your resume text and, ideally, the target job description. <b>Check ATS Score</b> runs instantly in your browser against real, documented ATS parsing rules (keyword match, action verbs, quantification, standard sections, contact info, length) — no scanner can promise a universal "100" against every company's proprietary system, so treat this as a rigorous compatibility estimate, not a guarantee. <b>Rewrite with AI</b> sends both to Claude through your local server to restructure and rephrase bullets (verb → tech → scope → outcome) and work in job-description keywords — it never invents metrics, employers, or skills. Needs an Anthropic API key in <code>.env</code> (set up by <code>./setup</code>) and only works when running locally, not in the shared artifact view.</p>
+
+  <div class="cols2">
+    <div class="panel">
+      <h4 style="margin:0 0 6px">Your resume text</h4>
+      <textarea id="resumeInput" style="min-height:220px" placeholder="Paste your resume text here (copy from Word/PDF/Google Docs)…"></textarea>
+    </div>
+    <div class="panel">
+      <h4 style="margin:0 0 6px">Target job description <span class="csub">(optional, improves scoring + rewrite)</span></h4>
+      <textarea id="jdInput" style="min-height:220px" placeholder="Paste the job posting text here…"></textarea>
+    </div>
+  </div>
+
+  <div class="toolrow" style="margin-top:14px">
+    <button class="btn primary" id="atsCheckBtn" type="button">Check ATS Score</button>
+    <button class="btn" id="aiRewriteBtn" type="button">✨ Rewrite with AI</button>
+    <span class="csub" id="rewriteStatus"></span>
+  </div>
+
+  <div id="atsScoreArea"></div>
+
+  <div class="panel" id="rewritePanel" hidden style="margin-top:14px">
+    <h4 style="margin:0 0 6px">AI-rewritten resume</h4>
+    <textarea id="rewriteOutput" style="min-height:320px"></textarea>
+    <div class="toolrow" style="margin-top:10px">
+      <button class="btn" id="copyRewriteBtn" type="button">Copy rewritten text</button>
+      <button class="btn" id="rescoreRewriteBtn" type="button">Re-check ATS score</button>
+    </div>
+  </div>
 </section>
 
 <section id="tracker">

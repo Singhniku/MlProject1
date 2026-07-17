@@ -14,6 +14,7 @@ import { ProfessorsView } from "./views/ProfessorsView.js";
 import { TrackerView } from "./views/TrackerView.js";
 import { ValueView } from "./views/ValueView.js";
 import { EmailModalView } from "./views/EmailModalView.js";
+import { ResumeModifierView } from "./views/ResumeModifierView.js";
 
 const STORAGE_KEY = "gradapp-2027-v2";
 
@@ -29,6 +30,7 @@ const colleges = new CollegesView(store);
 const professors = new ProfessorsView(emailModal);
 const tracker = new TrackerView(store);
 const value = new ValueView();
+const resumeModifier = new ResumeModifierView();
 const stateViews = [overview, colleges, tracker, value];
 
 function updateStorageChip() {
@@ -66,6 +68,7 @@ async function main() {
   new TabController().init();
   emailModal.init();
   professors.init(); // independent of tracking state
+  resumeModifier.init(); // independent of tracking state
 
   await store.init(); // load persisted state (remote DB wins if present)
 
