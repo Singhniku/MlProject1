@@ -20,12 +20,12 @@ The app is a **modular vanilla-JS ES-module project** (SOLID) that also ships as
 
 Six tabs: Overview · Top 50 Colleges · Professors & Outreach (email-draft modal) · Resume Modifier (ATS scoring + AI rewrite) · Application Tracker · Best Under $30K.
 
-**Quickest start:** `./setup` — checks Python, prompts once for an Anthropic API key (stored in gitignored `.env`), builds the bundle, and launches the server + browser.
+**Quickest start:** `./setup` — checks Python, prompts once for a Gemini API key (stored in gitignored `config/.env`), builds the bundle, and launches the server + browser.
 
 ### Resume Modifier — ATS scoring and AI rewrite
 
 - **ATS score (always available, no key needed):** `src/services/AtsAnalyzer.js` runs entirely client-side against documented ATS parsing rules — contact info, standard section headers, quantified bullets, weak-verb/passive-voice phrases, length, and keyword match against a pasted job description (worth 25 of 100 points; needs a JD to score). There is no universal "ATS score" any tool can guarantee against every company's proprietary system — the UI states this explicitly; treat the number as a compatibility estimate, not a promise.
-- **AI rewrite (needs a local server + API key):** `src/services/ResumeRewriteService.js` POSTs resume + job description to `server.py`'s `/api/resume/rewrite`, which calls the Anthropic API (`claude-sonnet-5`) with a system prompt enforcing the verb→tech→scope→outcome bullet pattern and forbidding invented facts/metrics. **The API key lives server-side only** (`.env`, gitignored) — never in browser storage or the bundled artifact, since that file is publicly reachable via the Artifact link. Fails gracefully with a clear on-screen message if no key is configured or the local server isn't running (e.g. when viewing the published artifact, which has no server to call).
+- **AI rewrite (needs a local server + API key):** `src/services/ResumeRewriteService.js` POSTs resume + job description to `server.py`'s `/api/resume/rewrite`, which calls the Gemini API (`generateContent`, model `gemini-2.0-flash` — override via `GEMINI_MODEL` env var) with a system prompt enforcing the verb→tech→scope→outcome bullet pattern and forbidding invented facts/metrics. **The API key lives server-side only** (`config/.env`, gitignored) — never in browser storage or the bundled artifact, since that file is publicly reachable via the Artifact link. Fails gracefully with a clear on-screen message if no key is configured or the local server isn't running (e.g. when viewing the published artifact, which has no server to call).
 
 ### Architecture (see CODE_UNDERSTANDING.md for the full module map)
 

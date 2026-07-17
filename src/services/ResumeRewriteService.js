@@ -1,5 +1,5 @@
-// Calls the local server's AI-rewrite endpoint (server.py -> Anthropic API using a key
-// from .env). Only works when the app is served locally with a configured API key —
+// Calls the local server's AI-rewrite endpoint (server.py -> Gemini API using a key
+// from config/.env). Only works when the app is served locally with a configured API key —
 // the published Artifact has no server to call, so this fails with a clear message there.
 export const ResumeRewriteService = {
   async rewrite(resumeText, jobText) {

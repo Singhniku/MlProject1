@@ -244,7 +244,7 @@ input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
 
 <section id="resume">
   <h2>Resume Modifier — ATS optimization</h2>
-  <p class="note">Paste your resume text and, ideally, the target job description. <b>Check ATS Score</b> runs instantly in your browser against real, documented ATS parsing rules (keyword match, action verbs, quantification, standard sections, contact info, length) — no scanner can promise a universal "100" against every company's proprietary system, so treat this as a rigorous compatibility estimate, not a guarantee. <b>Rewrite with AI</b> sends both to Claude through your local server to restructure and rephrase bullets (verb → tech → scope → outcome) and work in job-description keywords — it never invents metrics, employers, or skills. Needs an Anthropic API key in <code>.env</code> (set up by <code>./setup</code>) and only works when running locally, not in the shared artifact view.</p>
+  <p class="note">Paste your resume text and, ideally, the target job description. <b>Check ATS Score</b> runs instantly in your browser against real, documented ATS parsing rules (keyword match, action verbs, quantification, standard sections, contact info, length) — no scanner can promise a universal "100" against every company's proprietary system, so treat this as a rigorous compatibility estimate, not a guarantee. <b>Rewrite with AI</b> sends both to Gemini through your local server to restructure and rephrase bullets (verb → tech → scope → outcome) and work in job-description keywords — it never invents metrics, employers, or skills. Needs a Gemini API key in <code>config/.env</code> (set up by <code>./setup</code>) and only works when running locally, not in the shared artifact view.</p>
 
   <div class="cols2">
     <div class="panel">
@@ -887,8 +887,8 @@ function analyzeResume(resumeText, jobText = "") {
 }
 
 /* ===== src/services/ResumeRewriteService.js ===== */
-// Calls the local server's AI-rewrite endpoint (server.py -> Anthropic API using a key
-// from .env). Only works when the app is served locally with a configured API key —
+// Calls the local server's AI-rewrite endpoint (server.py -> Gemini API using a key
+// from config/.env). Only works when the app is served locally with a configured API key —
 // the published Artifact has no server to call, so this fails with a clear message there.
 const ResumeRewriteService = {
   async rewrite(resumeText, jobText) {

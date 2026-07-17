@@ -8,23 +8,24 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-# Resume Modifier's AI rewrite needs an Anthropic API key. Store it in a local .env
+# Resume Modifier's AI rewrite needs a Gemini API key. Store it in config/.env
 # (gitignored, chmod 600) — never in the browser or the bundled artifact.
-if [ -f .env ] && grep -q '^ANTHROPIC_API_KEY=' .env 2>/dev/null; then
-  echo ".env already has an ANTHROPIC_API_KEY — skipping."
-elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-  echo "Using ANTHROPIC_API_KEY from your shell environment."
+mkdir -p config
+if [ -f config/.env ] && grep -q '^GEMINI_API_KEY=.\+' config/.env 2>/dev/null; then
+  echo "config/.env already has a GEMINI_API_KEY — skipping."
+elif [ -n "${GEMINI_API_KEY:-}" ]; then
+  echo "Using GEMINI_API_KEY from your shell environment."
 else
   echo ""
-  echo "The Resume Modifier's AI rewrite calls the Anthropic API with your own key."
-  echo "Get one at https://console.anthropic.com/settings/keys (skip to use ATS scoring only)."
-  read -rp "Paste your Anthropic API key (or press Enter to skip): " key
+  echo "The Resume Modifier's AI rewrite calls the Gemini API with your own key."
+  echo "Get one at https://aistudio.google.com/apikey (skip to use ATS scoring only)."
+  read -rp "Paste your Gemini API key (or press Enter to skip): " key
   if [ -n "$key" ]; then
-    printf 'ANTHROPIC_API_KEY=%s\n' "$key" >> .env
-    chmod 600 .env
-    echo "Saved to .env (gitignored — never committed, never sent to the browser)."
+    printf 'GEMINI_API_KEY=%s\n' "$key" >> config/.env
+    chmod 600 config/.env
+    echo "Saved to config/.env (gitignored — never committed, never sent to the browser)."
   else
-    echo "Skipped. ATS scoring still works fully; add a key to .env later to enable AI rewrite."
+    echo "Skipped. ATS scoring still works fully; add a key to config/.env later to enable AI rewrite."
   fi
 fi
 

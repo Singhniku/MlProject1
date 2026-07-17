@@ -7,8 +7,8 @@ Data: all tracking state (statuses, notes, checklists) is stored in
       gradapp.db next to this file, so every session resumes where
       the last one ended — independent of browser storage.
 
-AI rewrite: POST /api/resume/rewrite calls the Anthropic API using ANTHROPIC_API_KEY,
-read from the environment or from a local .env file (gitignored — see ./setup).
+AI rewrite: POST /api/resume/rewrite calls the Gemini API using GEMINI_API_KEY,
+read from the environment or from config/.env (gitignored — see ./setup).
 The key never touches the browser or the bundled grad-dashboard.html artifact.
 """
 import json
@@ -22,10 +22,8 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DB = ROOT / "gradapp.db"
+ENV_FILE = ROOT / "config" / ".env"
 PORT = 8500
-
-ANTHROPIC_MODEL = "claude-sonnet-5"
-ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 
 REWRITE_SYSTEM_PROMPT = (
     "You are an expert resume writer optimizing resumes to pass Applicant Tracking "
@@ -41,11 +39,10 @@ REWRITE_SYSTEM_PROMPT = (
 
 
 def load_env_file():
-    """Load KEY=VALUE lines from a local .env (gitignored) without overriding real env vars."""
-    env_path = ROOT / ".env"
-    if not env_path.exists():
+    """Load KEY=VALUE lines from config/.env (gitignored) without overriding real env vars."""
+    if not ENV_FILE.exists():
         return
-    for line in env_path.read_text(encoding="utf-8").splitlines():
+    for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -55,6 +52,9 @@ def load_env_file():
 
 load_env_file()
 
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+
 
 def db():
     conn = sqlite3.connect(DB)
@@ -62,8 +62,8 @@ def db():
     return conn
 
 
-def call_anthropic(resume_text, job_text):
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+def call_gemini(resume_text, job_text):
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("NO_API_KEY")
 
@@ -73,26 +73,28 @@ def call_anthropic(resume_text, job_text):
     )
     payload = json.dumps(
         {
-            "model": ANTHROPIC_MODEL,
-            "max_tokens": 4096,
-            "system": REWRITE_SYSTEM_PROMPT,
-            "messages": [{"role": "user", "content": user_prompt}],
+            "system_instruction": {"parts": [{"text": REWRITE_SYSTEM_PROMPT}]},
+            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+            "generationConfig": {"maxOutputTokens": 4096},
         }
     ).encode("utf-8")
 
     req = urllib.request.Request(
-        ANTHROPIC_URL,
+        GEMINI_URL,
         data=payload,
         method="POST",
         headers={
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
+            "x-goog-api-key": api_key,
             "content-type": "application/json",
         },
     )
     with urllib.request.urlopen(req, timeout=60) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    return "".join(block.get("text", "") for block in data.get("content", []))
+    candidates = data.get("candidates") or []
+    if not candidates:
+        raise RuntimeError("Gemini returned no candidates (the response may have been blocked by safety filters).")
+    parts = candidates[0].get("content", {}).get("parts", [])
+    return "".join(p.get("text", "") for p in parts)
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -161,18 +163,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(400, {"error": "resumeText is required."})
                 return
             try:
-                rewritten = call_anthropic(resume_text, job_text)
+                rewritten = call_gemini(resume_text, job_text)
                 self._json_response(200, {"rewritten": rewritten})
-            except RuntimeError:
-                self._json_response(
-                    400,
-                    {"error": "No ANTHROPIC_API_KEY configured. Run ./setup to add one, or set it in .env."},
-                )
+            except RuntimeError as e:
+                if str(e) == "NO_API_KEY":
+                    self._json_response(
+                        400,
+                        {"error": "No GEMINI_API_KEY configured. Run ./setup to add one, or set it in config/.env."},
+                    )
+                else:
+                    self._json_response(502, {"error": str(e)})
             except urllib.error.HTTPError as e:
                 detail = e.read().decode("utf-8", "ignore")[:300]
-                self._json_response(e.code, {"error": f"Anthropic API error ({e.code}): {detail}"})
+                self._json_response(e.code, {"error": f"Gemini API error ({e.code}): {detail}"})
             except urllib.error.URLError as e:
-                self._json_response(504, {"error": f"Couldn't reach the Anthropic API: {e.reason}"})
+                self._json_response(504, {"error": f"Couldn't reach the Gemini API: {e.reason}"})
             except Exception as e:
                 self._json_response(500, {"error": str(e)})
             return
@@ -186,6 +191,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as srv:
-        key_status = "configured" if os.environ.get("ANTHROPIC_API_KEY") else "NOT set — AI rewrite disabled, run ./setup"
-        print(f"Dashboard: http://127.0.0.1:{PORT}   (data persists in {DB.name}; ANTHROPIC_API_KEY: {key_status})")
+        key_status = "configured" if os.environ.get("GEMINI_API_KEY") else "NOT set — AI rewrite disabled, run ./setup"
+        print(f"Dashboard: http://127.0.0.1:{PORT}   (data persists in {DB.name}; GEMINI_API_KEY: {key_status})")
         srv.serve_forever()
