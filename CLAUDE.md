@@ -43,6 +43,10 @@ Five tabs: Overview (stats + deadline timeline + profile advice) · Top 50 Colle
 - Both scripts hold the resume content inline; edit bullets there and re-run. Amex section: 10 ATS-optimized bullets (verb → tech keywords → quantified scope → business outcome). Only real metrics — never invent percentages.
 - Run with system `python3` (anaconda). `node`/`soffice`/`pdftoppm` are NOT installed on this machine; `python-docx`, `reportlab`, `pdfplumber` are.
 
-## Workflow rule
+## Docs & workflow
 
-After every change in this repo, commit to git (`git add -A && git commit`) so future sessions can read context from history instead of re-deriving it.
+- **CODE_UNDERSTANDING.md** — function-level map of the repo (IDs, data constants, renderers, files). Read it INSTEAD of re-scanning source to save tokens; it complements this file's high-level context.
+- **`update-docs` skill** (`.claude/skills/update-docs`) — run after any code change to refresh CODE_UNDERSTANDING.md and add a dated changelog line.
+- **`sync-repo` skill** (`.claude/skills/sync-repo`) — commit and push to GitHub (`origin` = https://github.com/Singhniku/MlProject1.git).
+
+After every change: update the affected code → run `update-docs` → run `sync-repo` (commit + push). Never commit `gradapp.db` (gitignored user data). Pushing needs `gh auth login` if not already authenticated.
