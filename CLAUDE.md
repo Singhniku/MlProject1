@@ -4,37 +4,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Nikita Singh's personal tooling for MS Fall 2027 applications (US grad schools, AI/ML/CS focus) plus resume generation. No build system, no tests — plain Python scripts and a single self-contained HTML app.
+Nikita Singh's personal tooling for MS Fall 2027 applications (US grad schools, AI/ML/CS focus) plus resume generation. A modular vanilla-JS web app (no framework, no npm) plus plain Python scripts.
 
 Owner profile (used throughout): GRE 305 (Q160/V145), B.Tech CSE GPA 8.2/10, 4 yrs SWE — American Express (Oct 2024–present, agentic AI/Llama, JDK 21 migration, SCRA platform), Jubilant Foodworks (Aug 2022–Sep 2024), IndiaMart. Email nikitasingh18dec@gmail.com.
 
-## grad-dashboard.html — the application dashboard
+## The application dashboard — modular app + single-file artifact
 
-Single-file web app (inline CSS+JS, no dependencies, no external requests) published as a Claude Artifact:
-**https://claude.ai/code/artifact/ab97543e-3249-4fe5-a565-4d9d4914c5ba**
+The app is a **modular vanilla-JS ES-module project** (SOLID) that also ships as a **single self-contained file** for the Claude Artifact. Two ways it runs:
 
-To update the live artifact: edit this file, then republish with the Artifact tool **using this exact URL as `url`** (a session that didn't create it would otherwise mint a new URL). Verify changes first by serving locally (`python3 -m http.server`) and driving the page in the Browser pane — direct `file://` navigation is blocked.
+- **Local app (source of truth):** `python3 server.py` → http://127.0.0.1:8500 serves `index.html`, which loads `styles.css` and `src/app.js` (ES modules). This is where you edit and where the SQLite DB persistence works. `.claude/launch.json` runs it as an app in the preview.
+- **Artifact (single file):** `python3 build.py` bundles `styles.css` + all `src/*.js` (import/export stripped, dependency order) into **`grad-dashboard.html`**, published at
+  **https://claude.ai/code/artifact/ab97543e-3249-4fe5-a565-4d9d4914c5ba**
 
-Five tabs: Overview (stats + deadline timeline + profile advice) · Top 50 Colleges · Professors & Outreach (email-draft modal) · Application Tracker · Best Under $30K.
+**Edit `src/`, never `grad-dashboard.html` directly** (it's generated). Workflow: edit modules → `python3 build.py` → verify at localhost:8500 (and optionally /grad-dashboard.html) in the Browser pane → republish the artifact with the Artifact tool **using the exact URL above as `url`** (a session that didn't create it would otherwise mint a new URL — as happens if you publish from the repo path without `url`). Direct `file://` navigation is blocked; always serve over HTTP.
 
-### Data structures (all in the single inline `<script>`)
+Five tabs: Overview · Top 50 Colleges · Professors & Outreach (email-draft modal) · Application Tracker · Best Under $30K.
 
-- `S` — 50 schools, ascending rank (US News CS + CSRankings blend). Fields: `r` rank, `id`, `n` name, `c` city, `prog` degree route, `f` research focus tags, `t` est. total intl tuition (null = no external MS route, e.g. MIT/Caltech), `d`/`dn` expected Fall-2027 deadline + note, `p` portal URL, `note` one-liner, `profs` [[name, research area] × 2] (affiliations as of early 2026).
-- `EXTRA` — keyed by school id: `prob` (est. admit % for the owner's profile), `ex` (exam requirements string), `v` (1 = GRE policy verified on the university's own site July 2026 — 12 schools: cmu, stanford, uiuc, gatech, usc, utd, stonybrook, buffalo, harvard, psu, ufl, columbia), `gd` (per-program GRE detail, verified schools only).
-- `PROGS` — keyed by school id: array of `[areas[], programName, requirement]`. Area codes map via `AREAS`: AI, CV, AML (Applied ML), DS, CS, DE (Data Eng), DML (Distributed ML), NLP, ANLP (Advanced NLP). Drives the area filter chips and the "Programs & requirements" block in each row's expand.
-- `VALUE` — 5 budget schools outside the top-50 (tuition < $30K total).
-- `CHECK_ITEMS` (10 materials: SOP, 3 LORs, transcripts, resume, projects, GRE/TOEFL sent, fee) and `STATUSES` (not/prog/sub/int/adm/rej).
-- User state (`{schoolId: {status, notes, checks}}`) has two persistence layers, handled in `save()`/`init()`:
-  1. **Local SQLite DB (preferred)** — `python3 server.py` serves the dashboard at http://127.0.0.1:8500 with `GET/PUT /api/state` backed by `gradapp.db` (kv table, whole state as one JSON row; the DB file is gitignored). The page detects the API on load, shows a "Saved to local DB" chip, and debounce-saves (400 ms) every change. Sessions always resume with prior data, even if the browser storage is cleared.
-  2. **localStorage** key **`gradapp-2027-v2`** — fallback used automatically when there is no server (e.g. the published artifact, where CSP blocks fetch). Header has Export/Import JSON buttons to move data between the two.
-  Notes are two-way synced between the Top-50 expand textarea (`data-note`) and the Tracker textarea (`data-tnote`).
+### Architecture (see CODE_UNDERSTANDING.md for the full module map)
+
+- `src/data/` — pure data: `SCHOOLS` (schools.js), `VALUE_SCHOOLS` (value.js), `ADMISSIONS` (admissions.js; `v:1`=GRE verified on the univ. site Jul 2026 for 12 ids), `AREAS`+`PROGRAMS` (programs.js), `CHECK_ITEMS`+`STATUSES` (checklist.js).
+- `src/core/` — `dom.js`, `format.js`, `presenters.js` (pills/cells), `Store.js` (`ApplicationStore`: single source of truth, observer, emits typed changes).
+- `src/storage/` — `StorageProvider` base + `LocalStorageProvider` + `ApiStorageProvider` + `CompositeStorageProvider` (Dependency Inversion; add a backend without touching the store).
+- `src/services/` — `ScholarLinkService`, `EmailComposer`.
+- `src/views/` — `View` base + `TabController`, `OverviewView`, `CollegesView`, `ProfessorsView`, `TrackerView`, `ValueView`, `EmailModalView`. Each owns one DOM region and reacts to store changes via `onChange`.
+- `src/app.js` — composition root (builds storage → store → views, injects deps, subscribes).
+
+### Persistence
+
+User state `{schoolId:{status,notes,checks}}` via `CompositeStorageProvider`:
+1. **Local SQLite DB (preferred)** — `server.py` exposes `GET/PUT /api/state` backed by `gradapp.db` (kv table, one JSON row; gitignored). Detected on load ("Saved to local DB" chip), debounce-saved (400 ms); survives browser-storage clears.
+2. **localStorage** key **`gradapp-2027-v2`** — automatic fallback when no server (the artifact). Header Export/Import JSON moves data between them.
+Notes sync between the Top-50 textarea (`data-note`) and Tracker textarea (`data-tnote`) through the store's `notes` change (with `source` to avoid clobbering the focused field).
 
 ### Conventions / gotchas
 
-- Keep `<meta charset="utf-8">` first — the file uses · — ✓ etc. and mojibakes without it.
-- Theme tokens defined on `:root`, redefined under `@media (prefers-color-scheme: dark)` and again under `:root[data-theme="dark"]` / `[data-theme="light"]` (artifact viewer stamps `data-theme`). Never style components directly inside the media query.
-- All figures (tuition, deadlines, admit %) are estimates from recent cycles for Fall-2027 planning; the UI labels verified vs estimated — keep that honesty when editing.
-- Professor emails are generated by `emailText()` with a `[bracketed]` slot the user must replace with a real recent paper; Scholar links are search URLs built by `scholarUrl()`.
+- `build.py` writes `grad-dashboard.html` WITHOUT doctype/html/head/body wrappers (the artifact host adds them) and starts with `<meta charset="utf-8">` — the UI uses · — ✓ and mojibakes otherwise. `index.html` is a full HTML doc for local serving.
+- All top-level symbols across `src/` must be uniquely named — the bundler concatenates modules into one scope.
+- Theme tokens on `:root`, redefined under `@media (prefers-color-scheme: dark)` and `:root[data-theme="dark"]`/`[data-theme="light"]` (artifact viewer stamps `data-theme`). Never style components inside the media query.
+- All figures (tuition, deadlines, admit %) are estimates for Fall-2027 planning; the UI labels verified vs estimated — keep that honesty.
+- Professor emails come from `EmailComposer.compose()` with a `[bracketed]` slot for a real recent paper; Scholar links from `ScholarLinkService.authorSearch()`.
 
 ## resume/ — resume generators
 

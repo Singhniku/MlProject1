@@ -2,29 +2,18 @@
 <title>MS Fall 2027 — Application Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
+:root{
+  --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
+  --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
+  --gold:#96691C; --gold-soft:#F4EAD6;
+  --good:#2E7D46; --good-soft:#E1F0E4;
+  --warn:#A8731E; --warn-soft:#F6ECD8;
+  --bad:#B3423A; --bad-soft:#F6E3E1;
+  --info:#3A5FA8; --info-soft:#E4EAF6;
+  --shadow:0 1px 3px rgba(20,35,28,.08);
+}
+@media (prefers-color-scheme: dark){
   :root{
-    --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
-    --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
-    --gold:#96691C; --gold-soft:#F4EAD6;
-    --good:#2E7D46; --good-soft:#E1F0E4;
-    --warn:#A8731E; --warn-soft:#F6ECD8;
-    --bad:#B3423A; --bad-soft:#F6E3E1;
-    --info:#3A5FA8; --info-soft:#E4EAF6;
-    --shadow:0 1px 3px rgba(20,35,28,.08);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#0E1512; --card:#161F1A; --ink:#E4ECE7; --muted:#8FA398; --line:#263129;
-      --accent:#4CB08A; --accent-soft:#1B2E26; --accent-ink:#8AD4B4;
-      --gold:#D6A24B; --gold-soft:#2E2717;
-      --good:#5CBF7C; --good-soft:#1A2E20;
-      --warn:#D9A544; --warn-soft:#2E2716;
-      --bad:#E0837B; --bad-soft:#331D1B;
-      --info:#8AA8E0; --info-soft:#1B2333;
-      --shadow:0 1px 3px rgba(0,0,0,.4);
-    }
-  }
-  :root[data-theme="dark"]{
     --bg:#0E1512; --card:#161F1A; --ink:#E4ECE7; --muted:#8FA398; --line:#263129;
     --accent:#4CB08A; --accent-soft:#1B2E26; --accent-ink:#8AD4B4;
     --gold:#D6A24B; --gold-soft:#2E2717;
@@ -34,146 +23,157 @@
     --info:#8AA8E0; --info-soft:#1B2333;
     --shadow:0 1px 3px rgba(0,0,0,.4);
   }
-  :root[data-theme="light"]{
-    --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
-    --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
-    --gold:#96691C; --gold-soft:#F4EAD6;
-    --good:#2E7D46; --good-soft:#E1F0E4;
-    --warn:#A8731E; --warn-soft:#F6ECD8;
-    --bad:#B3423A; --bad-soft:#F6E3E1;
-    --info:#3A5FA8; --info-soft:#E4EAF6;
-    --shadow:0 1px 3px rgba(20,35,28,.08);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
-  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 80px;}
-  header h1{font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
-    font-size:clamp(24px,4vw,32px);margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
-  header .sub{color:var(--muted);margin:0 0 12px;}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
-  .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;
-    padding:4px 12px;font-size:13px;box-shadow:var(--shadow);}
-  .chip b{color:var(--accent-ink);}
-  nav{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:22px;overflow-x:auto;}
-  nav button{appearance:none;background:none;border:none;border-bottom:2px solid transparent;
-    margin-bottom:-2px;padding:10px 14px;font:inherit;font-weight:600;font-size:14px;
-    color:var(--muted);cursor:pointer;white-space:nowrap;}
-  nav button:hover{color:var(--ink);}
-  nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px;}
-  nav button.on{color:var(--accent-ink);border-bottom-color:var(--accent);}
-  section{display:none;}
-  section.on{display:block;}
-  h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:20px;margin:0 0 4px;}
-  .note{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:74ch;}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
-  .stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-  .stat .v{font-size:26px;font-weight:700;margin-top:2px;}
-  .stat .d{font-size:12px;color:var(--muted);margin-top:2px;}
-  .tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);}
-  table{border-collapse:collapse;width:100%;min-width:1040px;font-size:14px;}
-  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
-    text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
-  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
-  tr:last-child td{border-bottom:none;}
-  td .cname{font-weight:650;}
-  td .csub{font-size:12px;color:var(--muted);}
-  .rankno{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-weight:700;font-size:17px;color:var(--gold);}
-  .pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:650;white-space:nowrap;}
-  .p-amb{background:var(--bad-soft);color:var(--bad);}
-  .p-tgt{background:var(--gold-soft);color:var(--gold);}
-  .p-safe{background:var(--good-soft);color:var(--good);}
-  .p-info{background:var(--info-soft);color:var(--info);}
-  .p-acc{background:var(--accent-soft);color:var(--accent-ink);}
-  .course{display:inline-block;background:var(--accent-soft);color:var(--accent-ink);
-    border-radius:5px;padding:1px 7px;font-size:11.5px;margin:1px 2px 1px 0;}
-  a{color:var(--accent-ink);font-weight:600;text-decoration:none;}
-  a:hover{text-decoration:underline;}
-  a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
-  .deadline .days{font-size:11.5px;}
-  .btn{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
-    background:var(--card);color:var(--ink);border-radius:7px;padding:4px 10px;cursor:pointer;}
-  .btn:hover{border-color:var(--accent);color:var(--accent-ink);}
-  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-  :root[data-theme="dark"] .btn.primary, .dark .btn.primary{color:#0E1512;}
-  .detail{background:var(--bg);}
-  .detail-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:6px 4px;}
-  @media(max-width:760px){.detail-inner{grid-template-columns:1fr;}}
-  .detail h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
-  .checks{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;}
-  .checks label{display:flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer;}
-  .checks input{accent-color:var(--accent);width:15px;height:15px;}
-  textarea{width:100%;min-height:84px;background:var(--card);color:var(--ink);border:1px solid var(--line);
-    border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;resize:vertical;}
-  textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
-  select.status{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
-    border-radius:999px;padding:3px 26px 3px 11px;cursor:pointer;color:var(--ink);
-    background:var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M1 1l4 4 4-4" stroke="%23888" fill="none" stroke-width="1.5"/></svg>') no-repeat right 9px center;}
-  select.status:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
-  .s-not{border-color:var(--line);}
-  .s-prog{background-color:var(--warn-soft);color:var(--warn);border-color:transparent;}
-  .s-sub{background-color:var(--info-soft);color:var(--info);border-color:transparent;}
-  .s-int{background-color:var(--gold-soft);color:var(--gold);border-color:transparent;}
-  .s-adm{background-color:var(--good-soft);color:var(--good);border-color:transparent;}
-  .s-rej{background-color:var(--bad-soft);color:var(--bad);border-color:transparent;}
-  .bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden;width:90px;}
-  .bar i{display:block;height:100%;background:var(--accent);border-radius:99px;}
-  .prog-lbl{font-size:11.5px;color:var(--muted);margin-top:3px;}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
-  .vcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow);
-    display:flex;flex-direction:column;gap:8px;}
-  .vcard .rank{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:13px;color:var(--gold);font-weight:700;}
-  .vcard h3{margin:0;font-size:16.5px;}
-  .vcard .price{font-size:22px;font-weight:750;}
-  .vcard .price small{font-size:12px;color:var(--muted);font-weight:400;}
-  .vcard .meta{font-size:12.5px;color:var(--muted);}
-  .vcard footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;}
-  .tl{list-style:none;margin:0;padding:0;}
-  .tl li{display:flex;gap:14px;align-items:baseline;padding:9px 2px;border-bottom:1px dashed var(--line);}
-  .tl li:last-child{border-bottom:none;}
-  .tl .date{width:120px;flex:none;font-weight:650;font-size:13px;}
-  .tl .who{flex:1;}
-  .tl .who small{color:var(--muted);}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);}
-  .cols2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
-  @media(max-width:820px){.cols2{grid-template-columns:1fr;}}
-  .advice{border-left:3px solid var(--gold);padding:2px 0 2px 12px;font-size:13.5px;color:var(--muted);margin-top:10px;}
-  .foot{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;}
-  /* professors */
-  .toolrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-  input.search{font:inherit;font-size:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);
-    border-radius:8px;padding:8px 12px;min-width:260px;flex:1;max-width:420px;}
-  input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
-  .fchip{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
-    background:var(--card);color:var(--muted);border-radius:999px;padding:5px 13px;cursor:pointer;}
-  .fchip:hover{border-color:var(--accent);color:var(--accent-ink);}
-  .fchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
-  .fchip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .uniblock{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;}
-  .uniblock header{display:flex;gap:10px;align-items:baseline;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
-  .uniblock header .cname{font-weight:700;}
-  .profrow{display:flex;gap:12px;align-items:center;padding:9px 16px;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
-  .profrow:last-child{border-bottom:none;}
-  .profrow .pname{font-weight:650;min-width:180px;}
-  .profrow .parea{flex:1;font-size:13px;color:var(--muted);min-width:200px;}
-  /* modal */
-  .overlay{position:fixed;inset:0;background:rgba(10,18,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
-  .overlay.on{display:flex;}
-  .modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:720px;width:100%;
-    max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.35);}
-  .modal header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);}
-  .modal header h3{margin:0;font-size:16px;font-family:"Iowan Old Style",Palatino,Georgia,serif;}
-  .modal .body{padding:14px 18px;overflow:auto;}
-  .modal textarea{min-height:340px;font-size:13px;line-height:1.55;}
-  .modal footer{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line);align-items:center;}
-  .modal .hint{margin-right:auto;font-size:12px;color:var(--muted);}
-  @media (prefers-reduced-motion: no-preference){
-    .modal{animation:pop .18s ease-out;}
-    @keyframes pop{from{transform:scale(.97);opacity:.6}to{transform:scale(1);opacity:1}}
-  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1512; --card:#161F1A; --ink:#E4ECE7; --muted:#8FA398; --line:#263129;
+  --accent:#4CB08A; --accent-soft:#1B2E26; --accent-ink:#8AD4B4;
+  --gold:#D6A24B; --gold-soft:#2E2717;
+  --good:#5CBF7C; --good-soft:#1A2E20;
+  --warn:#D9A544; --warn-soft:#2E2716;
+  --bad:#E0837B; --bad-soft:#331D1B;
+  --info:#8AA8E0; --info-soft:#1B2333;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+:root[data-theme="light"]{
+  --bg:#F2F5F3; --card:#FFFFFF; --ink:#1A2620; --muted:#5C6E64; --line:#DCE3DE;
+  --accent:#0E6B4F; --accent-soft:#E2EFE9; --accent-ink:#0A4A37;
+  --gold:#96691C; --gold-soft:#F4EAD6;
+  --good:#2E7D46; --good-soft:#E1F0E4;
+  --warn:#A8731E; --warn-soft:#F6ECD8;
+  --bad:#B3423A; --bad-soft:#F6E3E1;
+  --info:#3A5FA8; --info-soft:#E4EAF6;
+  --shadow:0 1px 3px rgba(20,35,28,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 80px;}
+header h1{font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  font-size:clamp(24px,4vw,32px);margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+header .sub{color:var(--muted);margin:0 0 12px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:4px 12px;font-size:13px;box-shadow:var(--shadow);}
+.chip b{color:var(--accent-ink);}
+nav{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:22px;overflow-x:auto;}
+nav button{appearance:none;background:none;border:none;border-bottom:2px solid transparent;
+  margin-bottom:-2px;padding:10px 14px;font:inherit;font-weight:600;font-size:14px;
+  color:var(--muted);cursor:pointer;white-space:nowrap;}
+nav button:hover{color:var(--ink);}
+nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px;}
+nav button.on{color:var(--accent-ink);border-bottom-color:var(--accent);}
+section{display:none;}
+section.on{display:block;}
+h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:20px;margin:0 0 4px;}
+.note{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:74ch;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
+.stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.stat .v{font-size:26px;font-weight:700;margin-top:2px;}
+.stat .d{font-size:12px;color:var(--muted);margin-top:2px;}
+.tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);}
+table{border-collapse:collapse;width:100%;min-width:1040px;font-size:14px;}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td .cname{font-weight:650;}
+td .csub{font-size:12px;color:var(--muted);}
+.rankno{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-weight:700;font-size:17px;color:var(--gold);}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:650;white-space:nowrap;}
+.p-amb{background:var(--bad-soft);color:var(--bad);}
+.p-tgt{background:var(--gold-soft);color:var(--gold);}
+.p-safe{background:var(--good-soft);color:var(--good);}
+.p-info{background:var(--info-soft);color:var(--info);}
+.p-acc{background:var(--accent-soft);color:var(--accent-ink);}
+.course{display:inline-block;background:var(--accent-soft);color:var(--accent-ink);
+  border-radius:5px;padding:1px 7px;font-size:11.5px;margin:1px 2px 1px 0;}
+a{color:var(--accent-ink);font-weight:600;text-decoration:none;}
+a:hover{text-decoration:underline;}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
+.deadline .days{font-size:11.5px;}
+.btn{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);border-radius:7px;padding:4px 10px;cursor:pointer;}
+.btn:hover{border-color:var(--accent);color:var(--accent-ink);}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+:root[data-theme="dark"] .btn.primary, .dark .btn.primary{color:#0E1512;}
+.detail{background:var(--bg);}
+.detail-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:6px 4px;}
+@media(max-width:760px){.detail-inner{grid-template-columns:1fr;}}
+.detail h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;}
+.checks label{display:flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer;}
+.checks input{accent-color:var(--accent);width:15px;height:15px;}
+textarea{width:100%;min-height:84px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;resize:vertical;}
+textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+select.status{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+  border-radius:999px;padding:3px 26px 3px 11px;cursor:pointer;color:var(--ink);
+  background:var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M1 1l4 4 4-4" stroke="%23888" fill="none" stroke-width="1.5"/></svg>') no-repeat right 9px center;}
+select.status:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.s-not{border-color:var(--line);}
+.s-prog{background-color:var(--warn-soft);color:var(--warn);border-color:transparent;}
+.s-sub{background-color:var(--info-soft);color:var(--info);border-color:transparent;}
+.s-int{background-color:var(--gold-soft);color:var(--gold);border-color:transparent;}
+.s-adm{background-color:var(--good-soft);color:var(--good);border-color:transparent;}
+.s-rej{background-color:var(--bad-soft);color:var(--bad);border-color:transparent;}
+.bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden;width:90px;}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;}
+.prog-lbl{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+.vcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:8px;}
+.vcard .rank{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:13px;color:var(--gold);font-weight:700;}
+.vcard h3{margin:0;font-size:16.5px;}
+.vcard .price{font-size:22px;font-weight:750;}
+.vcard .price small{font-size:12px;color:var(--muted);font-weight:400;}
+.vcard .meta{font-size:12.5px;color:var(--muted);}
+.vcard footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;}
+.tl{list-style:none;margin:0;padding:0;}
+.tl li{display:flex;gap:14px;align-items:baseline;padding:9px 2px;border-bottom:1px dashed var(--line);}
+.tl li:last-child{border-bottom:none;}
+.tl .date{width:120px;flex:none;font-weight:650;font-size:13px;}
+.tl .who{flex:1;}
+.tl .who small{color:var(--muted);}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);}
+.cols2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
+@media(max-width:820px){.cols2{grid-template-columns:1fr;}}
+.advice{border-left:3px solid var(--gold);padding:2px 0 2px 12px;font-size:13.5px;color:var(--muted);margin-top:10px;}
+.foot{margin-top:28px;font-size:12px;color:var(--muted);max-width:80ch;}
+/* professors */
+.toolrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+input.search{font:inherit;font-size:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:8px 12px;min-width:260px;flex:1;max-width:420px;}
+input.search:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.fchip{appearance:none;font:inherit;font-size:12.5px;font-weight:650;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);border-radius:999px;padding:5px 13px;cursor:pointer;}
+.fchip:hover{border-color:var(--accent);color:var(--accent-ink);}
+.fchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.fchip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.uniblock{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;}
+.uniblock header{display:flex;gap:10px;align-items:baseline;padding:11px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.uniblock header .cname{font-weight:700;}
+.profrow{display:flex;gap:12px;align-items:center;padding:9px 16px;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
+.profrow:last-child{border-bottom:none;}
+.profrow .pname{font-weight:650;min-width:180px;}
+.profrow .parea{flex:1;font-size:13px;color:var(--muted);min-width:200px;}
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(10,18,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.overlay.on{display:flex;}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:720px;width:100%;
+  max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.35);}
+.modal header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);}
+.modal header h3{margin:0;font-size:16px;font-family:"Iowan Old Style",Palatino,Georgia,serif;}
+.modal .body{padding:14px 18px;overflow:auto;}
+.modal textarea{min-height:340px;font-size:13px;line-height:1.55;}
+.modal footer{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line);align-items:center;}
+.modal .hint{margin-right:auto;font-size:12px;color:var(--muted);}
+@media (prefers-reduced-motion: no-preference){
+  .modal{animation:pop .18s ease-out;}
+  @keyframes pop{from{transform:scale(.97);opacity:.6}to{transform:scale(1);opacity:1}}
+}
 </style>
 
 <div class="wrap">
@@ -275,12 +275,13 @@
   </div>
 </div>
 
-<script>
-/* ============ DATA ============ */
-/* r=rank, n=name, c=city, prog=degree, f=focus areas, t=est total intl tuition (null = no terminal MS route),
-   d=expected Fall-27 deadline, dn=deadline note, p=admissions portal, note=what to know,
-   profs=[name, research area] — affiliations as of early 2026, verify on Scholar */
-const S = [
+<script type="module">
+/* ===== src/data/schools.js ===== */
+// Ranked top-50 graduate programs (AI/ML/DS/CS). Ascending rank order (1 = strongest).
+// Fields: r rank, id, n name, c city, prog degree route, f focus tags,
+// t est. total intl tuition (null = no external MS route), d/dn Fall-2027 deadline + note,
+// p admissions portal, note one-liner, profs [[name, research area] x2] (affiliations early 2026).
+const SCHOOLS = [
 {r:1,id:"mit",n:"MIT",c:"Cambridge, MA",prog:"PhD-track / MEng",f:["AI","ML theory","NLP","Robotics"],t:null,d:"2026-12-15",dn:"PhD-track deadline",p:"https://gradadmissions.mit.edu/",note:"No general-admission MS CS; MEng is mostly internal. Realistically PhD-track only.",profs:[["Regina Barzilay","NLP · AI for medicine"],["Tommi Jaakkola","Machine learning theory · generative models"]]},
 {r:2,id:"cmu",n:"Carnegie Mellon University",c:"Pittsburgh, PA",prog:"MSCS / MSML / MSAII",f:["ML","NLP","Vision","Robotics"],t:95000,d:"2026-12-10",dn:"One round only",p:"https://applygrad.cs.cmu.edu/apply/",note:"Deepest AI course catalog anywhere; separate MS in ML and in AI & Innovation.",profs:[["Ruslan Salakhutdinov","Deep learning · foundation models"],["Graham Neubig","NLP · code generation"]]},
 {r:3,id:"stanford",n:"Stanford University",c:"Stanford, CA",prog:"MSCS",f:["AI","NLP","Vision","HCI"],t:80000,d:"2026-12-01",dn:"Single deadline",p:"https://gradadmissions.stanford.edu/",note:"MSCS AI track; GRE not accepted since 2023 cycle — SOP and LORs carry everything.",profs:[["Christopher Manning","NLP · foundation models"],["Chelsea Finn","Robot learning · meta-learning"]]},
@@ -333,8 +334,9 @@ const S = [
 {r:50,id:"buffalo",n:"SUNY Buffalo",c:"Buffalo, NY",prog:"MSCS",f:["AI","NLP","Vision"],t:47000,d:"2027-02-01",dn:"Intl deadline",p:"https://grad.buffalo.edu/apply.html",note:"Realistic admit for a 305 profile; national AI institute for exceptional education.",profs:[["Rohini Srihari","NLP · conversational AI"],["Jinjun Xiong","AI systems · edge AI"]]},
 ];
 
-/* value picks outside the research top-50 */
-const VALUE = [
+/* ===== src/data/value.js ===== */
+// Budget picks outside the research top-50 (est. total intl tuition < $30K).
+const VALUE_SCHOOLS = [
 {id:"csueb",n:"Cal State East Bay",c:"Hayward, CA",t:20000,f:["Software Eng","Data Science"],d:"2027-03-01",dn:"Space-limited",p:"https://www.csueastbay.edu/admissions/",why:"Bay Area location at CSU pricing — internship access beats the rank."},
 {id:"utep",n:"UT El Paso",c:"El Paso, TX",t:21000,f:["AI","Cybersecurity"],d:"2027-03-01",dn:"Rolling",p:"https://www.utep.edu/graduate/",why:"R1 research status at the lowest UT-system cost."},
 {id:"wsu",n:"Wichita State University",c:"Wichita, KS",t:22000,f:["ML","Software Eng"],d:"2027-02-01",dn:"Rolling priority",p:"https://www.wichita.edu/admissions/graduate/",why:"Lowest cost per credit on this page."},
@@ -342,11 +344,11 @@ const VALUE = [
 {id:"unt",n:"University of North Texas",c:"Denton, TX",t:28000,f:["AI","Data Science"],d:"2027-03-01",dn:"Intl deadline",p:"https://tgs.unt.edu/",why:"Tier-1 research school with DFW market access."},
 ];
 
-/* per-school admit probability (%) for a GRE 305 / Q160 / GPA 8.2 / 4-yr-SWE profile,
-   and exams required with competitive scores.
-   v:1 = GRE policy verified on the university's own site in July 2026 (gd = per-program detail);
-   v:0 = estimate from recent cycles — confirm on the portal before applying. */
-const EXTRA = {
+/* ===== src/data/admissions.js ===== */
+// Per-school admit probability (%) for a GRE 305 / Q160 / GPA 8.2 / 4-yr-SWE profile,
+// plus exam requirements. v:1 = GRE policy verified on the university's own site (Jul 2026),
+// gd = per-program GRE detail (verified schools). v:0 = estimate — confirm on the portal.
+const ADMISSIONS = {
 mit:{prob:2,ex:"GRE not required · TOEFL 100 / IELTS 7.0",v:0},
 cmu:{prob:3,ex:"GRE varies by program · TOEFL 102 / IELTS 7.5",v:1,gd:"MSCS: GRE strongly recommended, esp. without strong math evidence · MS in ML: GRE optional · MSAII: optional · scores must be <5 yrs old; per-program policy set individually"},
 stanford:{prob:3,ex:"GRE not considered · TOEFL 100",v:1,gd:"MSCS: GRE not required and not considered for MS or PhD applicants — omitting it carries no penalty"},
@@ -399,11 +401,13 @@ ufl:{prob:35,ex:"GRE optional · TOEFL 80 / IELTS 6.0",v:1,gd:"CISE MS: GRE opti
 buffalo:{prob:55,ex:"GRE optional · TOEFL 79 / IELTS 6.5",v:1,gd:"MS CS: GRE optional for both MS and PhD · avg admit GPA ~3.4 · 2 LORs · intl applicants need English proficiency proof"},
 };
 
-/* graduate programs per university across the target course areas.
-   Each entry: [areas, program name, requirement]. "✓" = verified on the university site (Jul 2026);
-   otherwise dept-level policy from the Exams column applies — confirm per program on the portal. */
+/* ===== src/data/programs.js ===== */
+// Course-area codes and per-university graduate programs.
+// AREAS maps a code to its display label. PROGRAMS[schoolId] = [[areaCodes[], programName, requirement]...].
+// "✓" in a requirement = verified on the university site (Jul 2026).
 const AREAS = {AI:"Artificial Intelligence",CV:"Computer Vision",AML:"Applied ML",DS:"Data Science",CS:"Computer Science",DE:"Data Engineering",DML:"Distributed ML",NLP:"NLP",ANLP:"Advanced NLP"};
-const PROGS = {
+
+const PROGRAMS = {
 mit:[[["CS"],"MEng EECS","mostly internal MIT admits; external route is PhD"],[["AI","AML"],"EECS PhD — AI & Decision Making","GRE not required"],[["DS"],"MBAn — Business Analytics (Sloan)","GRE/GMAT accepted"]],
 cmu:[[["CS"],"MSCS","GRE strongly recommended ✓"],[["AML","DML"],"MS in Machine Learning (incl. 10-605 ML with Large Datasets)","GRE optional ✓"],[["AI"],"MSAII — AI & Innovation","GRE optional ✓"],[["DS","DE"],"MCDS — Computational Data Science","GRE recommended (LTI) — confirm"],[["NLP","ANLP"],"MIIS — Intelligent Information Systems (home of 11-711 Advanced NLP)","GRE recommended (LTI) — confirm"]],
 stanford:[[["CS","AI","CV"],"MSCS — AI specialization (CS229/CS231n/CS224n)","GRE not considered ✓"],[["DS"],"MS Statistics — Data Science","GRE policy differs — check Stats dept"]],
@@ -456,232 +460,270 @@ ufl:[[["CS","AI"],"MSCS (HiPerGator AI supercomputer access)","GRE optional ✓"
 buffalo:[[["CS","AI","NLP"],"MSCS — AI/ML focus","GRE optional ✓"],[["DS","DE"],"MS Engineering Science — Data Science","GRE optional — confirm"]],
 };
 
+/* ===== src/data/checklist.js ===== */
+// Application-material checklist items and application statuses.
+// CHECK_ITEMS: [key, label]. STATUSES: [value, label, cssClass].
 const CHECK_ITEMS = [
   ["sop","SOP tailored"],["lor1","LOR 1 requested"],["lor2","LOR 2 requested"],["lor3","LOR 3 requested"],
   ["transcript","Transcripts"],["resume","Resume uploaded"],["projects","Projects / portfolio"],
   ["gre","GRE score sent"],["english","TOEFL / IELTS sent"],["fee","Application fee paid"],
 ];
+
 const STATUSES = [
   ["not","Not started","s-not"],["prog","In progress","s-prog"],["sub","Submitted","s-sub"],
   ["int","Interview","s-int"],["adm","Admitted","s-adm"],["rej","Rejected","s-rej"],
 ];
 
-const KEY = "gradapp-2027-v2";
-let state = {};
-let dbMode = false;   // true when the local SQLite server (server.py) is reachable
-const fillDefaults = () => S.forEach(s => { state[s.id] = state[s.id] || {status:"not", notes:"", checks:{}}; });
+/* ===== src/core/dom.js ===== */
+// Minimal DOM helpers shared across views.
+const qs = (sel, root = document) => root.querySelector(sel);
+const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-let saveTimer;
-const save = () => {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
-  if (dbMode){
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      fetch("/api/state", {method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(state)}).catch(() => {});
-    }, 400);
-  }
-};
+// Escape user-supplied text before inserting into innerHTML templates.
+const escapeHtml = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-function updateStorageChip(){
-  const el = document.getElementById("storageChip");
-  if (el) el.innerHTML = dbMode
-    ? "💾 Saved to <b>local DB</b> (gradapp.db) — survives every session"
-    : "Saved in <b>this browser</b> — use Export for a backup, or run server.py for a local DB";
-}
+/* ===== src/core/format.js ===== */
+// Pure formatting helpers — no DOM, no state.
+const money = (n) => (n == null ? "—" : "$" + n.toLocaleString("en-US"));
 
-function exportData(){
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "gradapp-tracking-backup.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-function importData(file){
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const data = JSON.parse(r.result);
-      if (typeof data !== "object" || !data) throw new Error("bad");
-      state = data; fillDefaults(); save(); renderAll();
-    } catch(e) { alert("That file isn't a valid dashboard backup."); }
-  };
-  r.readAsText(file);
-}
+const formatDate = (iso) =>
+  new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-const $ = sel => document.querySelector(sel);
-const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
-const fmt$ = n => n==null ? "—" : "$" + n.toLocaleString("en-US");
-const doneCount = id => CHECK_ITEMS.filter(([k]) => state[id].checks[k]).length;
-const fmtDate = iso => new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-const daysTo = iso => Math.ceil((new Date(iso+"T12:00:00") - Date.now()) / 86400000);
-const probPill = id => {
-  const p = (EXTRA[id]||{}).prob ?? 0;
+const daysUntil = (iso) =>
+  Math.ceil((new Date(iso + "T12:00:00") - Date.now()) / 86400000);
+
+/* ===== src/core/presenters.js ===== */
+// Presentation helpers: turn domain data into the small HTML fragments the views reuse.
+// Depend on data + format only (no state, no DOM writes) so any view can call them.
+
+// Admit-probability pill for a school id.
+function probabilityPill(id) {
+  const p = (ADMISSIONS[id] || {}).prob ?? 0;
   const cls = p < 10 ? "p-amb" : p < 30 ? "p-tgt" : p < 50 ? "p-info" : "p-safe";
   const lbl = p < 5 ? "Very low" : p < 15 ? "Low" : p < 30 ? "Possible" : p < 50 ? "Fair" : "Good";
   return `<span class="pill ${cls}">~${p}% · ${lbl}</span>`;
-};
-const deadlineCell = s => {
-  const d = daysTo(s.d);
+}
+
+// Deadline cell with an urgency pill (school object with .d date and .dn note).
+function deadlineCell(school) {
+  const d = daysUntil(school.d);
   const cls = d < 60 ? "p-amb" : d < 150 ? "p-tgt" : "p-acc";
-  return `<div class="deadline"><span class="mono">${fmtDate(s.d)}</span><br>
-    <span class="pill ${cls} days">${d>0 ? d+" days left" : "passed"}</span>
-    <div class="csub">${s.dn}</div></div>`;
+  return `<div class="deadline"><span class="mono">${formatDate(school.d)}</span><br>
+    <span class="pill ${cls} days">${d > 0 ? d + " days left" : "passed"}</span>
+    <div class="csub">${school.dn}</div></div>`;
+}
+
+// Distinct area codes a school's programs cover.
+const schoolAreas = (id) => [...new Set((PROGRAMS[id] || []).flatMap((p) => p[0]))];
+
+/* ===== src/storage/StorageProvider.js ===== */
+// Abstract persistence contract. The store depends on THIS, not on any concrete
+// backend (Dependency Inversion), so new backends can be added without touching callers.
+class StorageProvider {
+  /** @returns {Promise<{state: object, remote: boolean}>} loaded state + whether a remote DB backs it */
+  async load() {
+    return { state: {}, remote: false };
+  }
+
+  /** Persist the whole state object. @param {object} _state */
+  async save(_state) {}
+}
+
+/* ===== src/storage/LocalStorageProvider.js ===== */
+// Browser localStorage backend. Always available; used standalone (e.g. the published
+// artifact) or as the fast local mirror inside CompositeStorageProvider.
+class LocalStorageProvider extends StorageProvider {
+  constructor(key) {
+    super();
+    this.key = key;
+  }
+
+  read() {
+    try {
+      return JSON.parse(localStorage.getItem(this.key)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  write(state) {
+    try {
+      localStorage.setItem(this.key, JSON.stringify(state));
+    } catch (e) {
+      /* quota or private-mode — ignore */
+    }
+  }
+
+  async load() {
+    return { state: this.read(), remote: false };
+  }
+
+  async save(state) {
+    this.write(state);
+  }
+}
+
+/* ===== src/storage/ApiStorageProvider.js ===== */
+// SQLite-backed backend exposed by server.py at /api/state (GET/PUT).
+// Absent when the page is opened without the local server (e.g. the artifact),
+// in which case load() reports remote:false and CompositeStorageProvider falls back.
+class ApiStorageProvider extends StorageProvider {
+  constructor(base = "/api/state") {
+    super();
+    this.base = base;
+  }
+
+  async load() {
+    try {
+      const r = await fetch(this.base, { cache: "no-store" });
+      if (!r.ok) return { state: {}, remote: false };
+      const state = await r.json();
+      return { state: state || {}, remote: true };
+    } catch (e) {
+      return { state: {}, remote: false };
+    }
+  }
+
+  async save(state) {
+    return fetch(this.base, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state),
+    });
+  }
+}
+
+/* ===== src/storage/CompositeStorageProvider.js ===== */
+// Composes a fast local mirror with an optional remote DB (Open/Closed: swap either
+// side without changing the store). On load, prefers non-empty remote state and mirrors
+// it locally; on save, always writes local immediately and debounces the remote write.
+class CompositeStorageProvider extends StorageProvider {
+  constructor(local, remote, debounceMs = 400) {
+    super();
+    this.local = local;
+    this.remote = remote;
+    this.debounceMs = debounceMs;
+    this.usingRemote = false;
+    this._timer = null;
+  }
+
+  async load() {
+    const localState = (await this.local.load()).state;
+    const { state: remoteState, remote } = await this.remote.load();
+    this.usingRemote = remote;
+    if (remote && remoteState && Object.keys(remoteState).length) {
+      this.local.write(remoteState); // mirror so the next offline session still has data
+      return { state: remoteState, remote: true };
+    }
+    return { state: localState, remote };
+  }
+
+  async save(state) {
+    this.local.write(state); // synchronous, never lost
+    if (!this.usingRemote) return;
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => {
+      this.remote.save(state).catch(() => {});
+    }, this.debounceMs);
+  }
+}
+
+/* ===== src/core/Store.js ===== */
+// Single source of truth for per-school tracking data ({status, notes, checks}).
+// Holds state, persists via an injected StorageProvider (Dependency Inversion), and
+// notifies subscribers with a typed change descriptor so each view refreshes only when relevant.
+class ApplicationStore {
+  constructor(storage, schools) {
+    this.storage = storage;
+    this.schools = schools;
+    this.state = {};
+    this.listeners = new Set();
+  }
+
+  // Ensure every school has a record so views never hit undefined.
+  fillDefaults() {
+    this.schools.forEach((s) => {
+      this.state[s.id] = this.state[s.id] || { status: "not", notes: "", checks: {} };
+    });
+  }
+
+  async init() {
+    const { state } = await this.storage.load();
+    this.state = state || {};
+    this.fillDefaults();
+    await this.storage.save(this.state); // mirror merged defaults back
+  }
+
+  get usingRemote() {
+    return !!this.storage.usingRemote;
+  }
+
+  // --- reads ---
+  record(id) {
+    return this.state[id];
+  }
+  materialsDone(id) {
+    return CHECK_ITEMS.filter(([k]) => this.state[id].checks[k]).length;
+  }
+
+  // --- mutations (each persists, then emits a typed change) ---
+  setStatus(id, value) {
+    this.state[id].status = value;
+    this._commit({ type: "status", id });
+  }
+  toggleCheck(id, key, value) {
+    this.state[id].checks[key] = value;
+    this._commit({ type: "checks", id });
+  }
+  setNotes(id, value, source) {
+    this.state[id].notes = value;
+    this._commit({ type: "notes", id, source });
+  }
+  replaceAll(data) {
+    this.state = data;
+    this.fillDefaults();
+    this._commit({ type: "reset" });
+  }
+
+  toJSON() {
+    return this.state;
+  }
+
+  // --- observer plumbing ---
+  subscribe(fn) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+  _commit(change) {
+    this.storage.save(this.state);
+    this.listeners.forEach((fn) => fn(change));
+  }
+}
+
+/* ===== src/services/ScholarLinkService.js ===== */
+// Builds a Google Scholar author-search URL so the user can confirm a professor's
+// current affiliation and recent papers before emailing.
+const ScholarLinkService = {
+  authorSearch(name, university) {
+    return (
+      "https://scholar.google.com/citations?view_op=search_authors&mauthors=" +
+      encodeURIComponent(name + " " + university)
+    );
+  },
 };
-const scholarUrl = (name, uni) =>
-  "https://scholar.google.com/citations?view_op=search_authors&mauthors=" + encodeURIComponent(name + " " + uni);
 
-/* ---- tabs ---- */
-document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x===b));
-  document.querySelectorAll("section").forEach(x => x.classList.toggle("on", x.id===b.dataset.tab));
-}));
-
-/* ---- overview ---- */
-function renderOverview(){
-  const total = S.length;
-  const submitted = S.filter(s => ["sub","int","adm"].includes(state[s.id].status)).length;
-  const inProg = S.filter(s => state[s.id].status==="prog").length;
-  const started = S.filter(s => state[s.id].status!=="not").length || 1;
-  const matDone = S.reduce((a,s) => a+doneCount(s.id), 0);
-  const next = [...S].sort((a,b) => a.d.localeCompare(b.d))[0];
-  $("#statTiles").innerHTML = `
-    <div class="stat"><div class="k">Ranked programs</div><div class="v">${total}</div>
-      <div class="d">full top-50 list, none filtered</div></div>
-    <div class="stat"><div class="k">Submitted</div><div class="v">${submitted}</div>
-      <div class="d">${inProg} in progress</div></div>
-    <div class="stat"><div class="k">Materials checked</div><div class="v">${matDone}</div>
-      <div class="d">across schools you're working on</div></div>
-    <div class="stat"><div class="k">First deadline</div><div class="v mono" style="font-size:19px">${fmtDate(next.d)}</div>
-      <div class="d">${next.n} · ${daysTo(next.d)} days out</div></div>`;
-  $("#timeline").innerHTML = [...S].sort((a,b) => a.d.localeCompare(b.d)).slice(0,12).map(s => `
-    <li><span class="date mono">${fmtDate(s.d)}</span>
-      <span class="who">#${s.r} ${s.n} <small>· ${s.dn}</small></span>${probPill(s.id)}</li>`).join("");
-}
-
-/* ---- top-50 table ---- */
-let activeArea = null;
-function renderAreaFilters(){
-  $("#areaFilters").innerHTML =
-    `<button class="fchip ${activeArea===null?"on":""}" data-area="">All areas</button>` +
-    Object.entries(AREAS).map(([k,label]) =>
-      `<button class="fchip ${activeArea===k?"on":""}" data-area="${k}">${label}</button>`).join("");
-  document.querySelectorAll("#areaFilters .fchip").forEach(b => b.addEventListener("click", () => {
-    activeArea = b.dataset.area || null;
-    renderAreaFilters(); renderColleges();
-  }));
-}
-const schoolAreas = id => [...new Set((PROGS[id]||[]).flatMap(p => p[0]))];
-function renderColleges(){
-  const shown = activeArea ? S.filter(s => schoolAreas(s.id).includes(activeArea)) : S;
-  $("#collegeTbl tbody").innerHTML = shown.map(s => {
-    const n = doneCount(s.id), tot = CHECK_ITEMS.length;
-    const progs = PROGS[s.id]||[];
-    return `
-    <tr>
-      <td class="rankno">${s.r}</td>
-      <td style="min-width:210px"><div class="cname">${s.n}</div><div class="csub">${s.c} · ${s.note}</div></td>
-      <td>${probPill(s.id)}</td>
-      <td class="csub" style="min-width:150px;max-width:190px">${(EXTRA[s.id]||{}).ex||"—"}
-        ${(EXTRA[s.id]||{}).v ? '<div><span class="pill p-safe" style="margin-top:3px">✓ verified on univ. site</span></div>' : '<div><span class="pill p-info" style="margin-top:3px">est. — verify</span></div>'}</td>
-      <td class="csub" style="white-space:nowrap">${s.prog}</td>
-      <td style="max-width:180px">${schoolAreas(s.id).map(a=>`<span class="course" title="${AREAS[a]}">${AREAS[a]}</span>`).join("")}
-        <div class="csub" style="margin-top:2px">${progs.length} program${progs.length>1?"s":""} — expand for reqs</div></td>
-      <td class="mono" style="font-weight:650">${fmt$(s.t)}${s.t?'<div class="csub" style="font-family:-apple-system,sans-serif">total, intl</div>':''}</td>
-      <td>${deadlineCell(s)}</td>
-      <td><a href="${s.p}" target="_blank" rel="noopener">Apply ↗</a></td>
-      <td>
-        <div class="bar"><i style="width:${100*n/tot}%"></i></div>
-        <div class="prog-lbl">${n}/${tot} ready</div>
-        <button class="btn" data-expand="${s.id}" aria-expanded="false">Checklist &amp; notes</button>
-      </td>
-    </tr>
-    <tr class="detail" id="d-${s.id}" hidden><td colspan="10">
-      <div class="detail-inner">
-        <div style="grid-column:1/-1"><h4>Programs &amp; requirements</h4>
-          ${progs.map(([areas,name,req]) => `
-          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--line)">
-            <span style="font-weight:650;font-size:13.5px">${name}</span>
-            ${areas.map(a=>`<span class="course">${AREAS[a]}</span>`).join("")}
-            <span class="csub" style="margin-left:auto">${req || "dept policy — see Exams column"}</span>
-          </div>`).join("")}
-        </div>
-        <div style="grid-column:1/-1"><h4>GRE requirement by program ${(EXTRA[s.id]||{}).v ? '<span class="pill p-safe">✓ verified on university site, Jul 2026</span>' : '<span class="pill p-info">estimated — confirm on portal</span>'}</h4>
-          <p style="margin:0;font-size:13.5px;max-width:100ch">${(EXTRA[s.id]||{}).gd || (EXTRA[s.id]||{}).ex || "See portal."}</p>
-        </div>
-        <div><h4>Application materials</h4>
-          <div class="checks">${CHECK_ITEMS.map(([k,label]) => `
-            <label><input type="checkbox" data-check="${s.id}:${k}" ${state[s.id].checks[k]?"checked":""}> ${label}</label>`).join("")}
-          </div>
-        </div>
-        <div><h4>Notes &amp; comments for this college</h4>
-          <textarea data-note="${s.id}" placeholder="Your comments — professor replies, fee waivers, SOP angle, doubts…">${esc(state[s.id].notes)}</textarea>
-        </div>
-      </div>
-    </td></tr>`;
-  }).join("");
-
-  document.querySelectorAll("[data-expand]").forEach(b => b.addEventListener("click", () => {
-    const row = document.getElementById("d-"+b.dataset.expand);
-    row.hidden = !row.hidden;
-    b.setAttribute("aria-expanded", String(!row.hidden));
-    b.textContent = row.hidden ? "Checklist & notes" : "Close";
-  }));
-  document.querySelectorAll("[data-check]").forEach(c => c.addEventListener("change", () => {
-    const [id,k] = c.dataset.check.split(":");
-    state[id].checks[k] = c.checked; save();
-    refreshProgress(id); renderOverview(); renderTracker();
-  }));
-  document.querySelectorAll("[data-note]").forEach(t => t.addEventListener("input", () => {
-    state[t.dataset.note].notes = t.value; save();
-    const other = document.querySelector(`[data-tnote="${t.dataset.note}"]`);
-    if (other) other.value = t.value;
-  }));
-}
-function refreshProgress(id){
-  const btn = document.querySelector(`[data-expand="${id}"]`);
-  if(!btn) return;
-  const cell = btn.parentElement;
-  const n = doneCount(id), tot = CHECK_ITEMS.length;
-  cell.querySelector(".bar i").style.width = (100*n/tot)+"%";
-  cell.querySelector(".prog-lbl").textContent = `${n}/${tot} ready`;
-}
-
-/* ---- professors ---- */
-function renderProfs(filter){
-  const q = (filter||"").trim().toLowerCase();
-  $("#profList").innerHTML = S.map(s => {
-    const rows = s.profs.filter(([name,area]) =>
-      !q || s.n.toLowerCase().includes(q) || name.toLowerCase().includes(q) || area.toLowerCase().includes(q));
-    if(!rows.length) return "";
-    return `<div class="uniblock">
-      <header><span class="rankno">#${s.r}</span><span class="cname">${s.n}</span>
-        <span class="csub">${s.c}</span>${probPill(s.id)}</header>
-      ${rows.map(([name,area]) => `
-      <div class="profrow">
-        <span class="pname">${name}</span>
-        <span class="parea">${area}</span>
-        <a href="${scholarUrl(name, s.n)}" target="_blank" rel="noopener">Scholar ↗</a>
-        <button class="btn primary" data-mail="${s.id}|${esc(name)}|${esc(area)}">Draft email</button>
-      </div>`).join("")}
-    </div>`;
-  }).join("") || '<p class="note">No matches — try a broader term.</p>';
-  document.querySelectorAll("[data-mail]").forEach(b => b.addEventListener("click", () => {
-    const [id,name,area] = b.dataset.mail.split("|");
-    openMail(S.find(x=>x.id===id), name, area);
-  }));
-}
-$("#profSearch").addEventListener("input", e => renderProfs(e.target.value));
-
-/* ---- email modal ---- */
-function emailText(s, name, area){
-  const last = name.split(" ").pop();
-  return `Subject: Prospective MS applicant (Fall 2027) — research assistance in ${area.split("·")[0].trim()}
+/* ===== src/services/EmailComposer.js ===== */
+// Composes a personalized outreach email to a professor from the owner's profile.
+// Returns the full text (first line is "Subject: …") plus a parsed subject/body pair
+// so callers can drop it into a textarea or a mailto: link without re-parsing.
+const EmailComposer = {
+  compose(school, name, area) {
+    const last = name.split(" ").pop();
+    const text = `Subject: Prospective MS applicant (Fall 2027) — research assistance in ${area.split("·")[0].trim()}
 
 Dear Prof. ${last},
 
-I am Nikita Singh, a software engineer at American Express with four years of backend and applied-AI experience, and I am applying to the MS program at ${s.n} for Fall 2027. Your group's work in ${area.toLowerCase()} is the reason ${s.n} is high on my list.
+I am Nikita Singh, a software engineer at American Express with four years of backend and applied-AI experience, and I am applying to the MS program at ${school.n} for Fall 2027. Your group's work in ${area.toLowerCase()} is the reason ${school.n} is high on my list.
 
 [Personalize this line before sending: name one specific recent paper of theirs from Google Scholar and say in one sentence what interested you or what you'd extend.]
 
@@ -698,95 +740,466 @@ Best regards,
 Nikita Singh
 nikitasingh18dec@gmail.com · +91 83187 21284
 linkedin.com/in/nikitasingh98`;
-}
-function openMail(s, name, area){
-  $("#mTitle").textContent = "Email — " + name + " (" + s.n + ")";
-  $("#mText").value = emailText(s, name, area);
-  $("#overlay").classList.add("on");
-  $("#mText").focus();
-}
-$("#mClose").addEventListener("click", () => $("#overlay").classList.remove("on"));
-$("#overlay").addEventListener("click", e => { if(e.target===e.currentTarget) e.currentTarget.classList.remove("on"); });
-document.addEventListener("keydown", e => { if(e.key==="Escape") $("#overlay").classList.remove("on"); });
-$("#mCopy").addEventListener("click", () => {
-  navigator.clipboard.writeText($("#mText").value).then(() => {
-    $("#mCopy").textContent = "Copied ✓";
-    setTimeout(() => $("#mCopy").textContent = "Copy email", 1600);
-  });
-});
-$("#mMailto").addEventListener("click", e => {
-  const t = $("#mText").value;
-  const nl = t.indexOf("\n");
-  const subject = t.slice(9, nl).trim();
-  const body = t.slice(nl+1).trim();
-  e.currentTarget.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-});
+    const nl = text.indexOf("\n");
+    return { text, subject: text.slice(9, nl).trim(), body: text.slice(nl + 1).trim() };
+  },
+};
 
-/* ---- tracker ---- */
-function renderTracker(){
-  $("#trackTbl tbody").innerHTML = S.map(s => {
-    const st = state[s.id].status;
-    const n = doneCount(s.id), tot = CHECK_ITEMS.length;
-    const cls = (STATUSES.find(x=>x[0]===st)||STATUSES[0])[2];
-    return `<tr>
-      <td class="rankno">${s.r}</td>
-      <td><div class="cname">${s.n}</div><div class="csub">${s.c}</div></td>
-      <td><select class="status ${cls}" data-status="${s.id}" aria-label="Status for ${s.n}">
-        ${STATUSES.map(([v,l]) => `<option value="${v}" ${v===st?"selected":""}>${l}</option>`).join("")}
-      </select></td>
-      <td><div class="bar"><i style="width:${100*n/tot}%"></i></div><div class="prog-lbl">${n}/${tot} ready</div></td>
-      <td>${deadlineCell(s)}</td>
-      <td style="min-width:220px"><textarea data-tnote="${s.id}" style="min-height:44px" placeholder="Comments…" aria-label="Notes for ${s.n}">${esc(state[s.id].notes)}</textarea></td>
-    </tr>`;
-  }).join("");
-  document.querySelectorAll("[data-status]").forEach(sel => sel.addEventListener("change", () => {
-    state[sel.dataset.status].status = sel.value; save();
-    sel.className = "status " + (STATUSES.find(x=>x[0]===sel.value)||STATUSES[0])[2];
-    renderOverview();
-  }));
-  document.querySelectorAll("[data-tnote]").forEach(t => t.addEventListener("input", () => {
-    state[t.dataset.tnote].notes = t.value; save();
-    const other = document.querySelector(`[data-note="${t.dataset.tnote}"]`);
-    if (other) other.value = t.value;
-  }));
+/* ===== src/views/View.js ===== */
+// Base class for every view. Views own one region of the DOM and expose render();
+// state-aware views also implement onChange(change) to react to store events.
+// Keeping the surface this small is deliberate (Interface Segregation) — callers only
+// ever need render()/onChange, and views stay substitutable (Liskov).
+class View {
+  constructor(root) {
+    this.root = root;
+  }
+  render() {}
+  onChange(_change) {}
 }
 
-/* ---- best value ---- */
-function renderValue(){
-  $("#valueCards").innerHTML = VALUE.sort((a,b) => a.t - b.t).map((s,i) => `
-    <div class="vcard">
-      <span class="rank">Value pick #${i+1}</span>
-      <h3>${s.n}</h3>
-      <div class="price mono">${fmt$(s.t)} <small>est. total intl tuition</small></div>
-      <div class="meta">${s.c} · ${s.why}</div>
-      <div>${s.f.map(c=>`<span class="course">${c}</span>`).join("")}</div>
-      <div class="meta">Deadline ${fmtDate(s.d)} (${s.dn})</div>
-      <footer><span class="pill p-safe">Safe</span> <a href="${s.p}" target="_blank" rel="noopener">Admission portal ↗</a></footer>
-    </div>`).join("");
+/* ===== src/views/TabController.js ===== */
+// Wires the tab bar: activates the clicked nav button and shows its matching section.
+// Independent of application state (Single Responsibility).
+class TabController {
+  constructor() {
+    this.buttons = qsa("nav button");
+    this.sections = qsa("section");
+  }
+
+  init() {
+    this.buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        this.buttons.forEach((x) => x.classList.toggle("on", x === b));
+        this.sections.forEach((x) => x.classList.toggle("on", x.id === b.dataset.tab));
+      })
+    );
+  }
 }
 
-function renderAll(){
-  renderOverview(); renderAreaFilters(); renderColleges(); renderProfs($("#profSearch").value); renderTracker(); renderValue();
-  updateStorageChip();
+/* ===== src/views/OverviewView.js ===== */
+// Overview tab: summary stat tiles + the earliest-deadlines timeline.
+class OverviewView extends View {
+  constructor(store) {
+    super(qs("#overview"));
+    this.store = store;
+  }
+
+  onChange(change) {
+    if (["status", "checks", "reset"].includes(change.type)) this.render();
+  }
+
+  render() {
+    const total = SCHOOLS.length;
+    const submitted = SCHOOLS.filter((s) => ["sub", "int", "adm"].includes(this.store.record(s.id).status)).length;
+    const inProg = SCHOOLS.filter((s) => this.store.record(s.id).status === "prog").length;
+    const matDone = SCHOOLS.reduce((a, s) => a + this.store.materialsDone(s.id), 0);
+    const next = [...SCHOOLS].sort((a, b) => a.d.localeCompare(b.d))[0];
+
+    qs("#statTiles").innerHTML = `
+      <div class="stat"><div class="k">Ranked programs</div><div class="v">${total}</div>
+        <div class="d">full top-50 list, none filtered</div></div>
+      <div class="stat"><div class="k">Submitted</div><div class="v">${submitted}</div>
+        <div class="d">${inProg} in progress</div></div>
+      <div class="stat"><div class="k">Materials checked</div><div class="v">${matDone}</div>
+        <div class="d">across schools you're working on</div></div>
+      <div class="stat"><div class="k">First deadline</div><div class="v mono" style="font-size:19px">${formatDate(next.d)}</div>
+        <div class="d">${next.n} · ${daysUntil(next.d)} days out</div></div>`;
+
+    qs("#timeline").innerHTML = [...SCHOOLS]
+      .sort((a, b) => a.d.localeCompare(b.d))
+      .slice(0, 12)
+      .map(
+        (s) => `
+      <li><span class="date mono">${formatDate(s.d)}</span>
+        <span class="who">#${s.r} ${s.n} <small>· ${s.dn}</small></span>${probabilityPill(s.id)}</li>`
+      )
+      .join("");
+  }
 }
 
-(async function init(){
-  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
-  try {
-    const r = await fetch("/api/state", {cache:"no-store"});
-    if (r.ok){
-      const serverState = await r.json();
-      if (serverState && Object.keys(serverState).length) state = serverState;
-      dbMode = true;
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+/* ===== src/views/CollegesView.js ===== */
+// Top-50 tab: area filter chips + the college table with an expandable detail row per
+// school (programs & requirements, GRE policy, materials checklist, notes).
+class CollegesView extends View {
+  constructor(store) {
+    super(qs("#colleges"));
+    this.store = store;
+    this.activeArea = null;
+  }
+
+  init() {
+    this.renderFilters();
+    this.render();
+  }
+
+  onChange(change) {
+    if (change.type === "reset") {
+      this.render();
+    } else if (change.type === "checks") {
+      this.refreshProgress(change.id);
+    } else if (change.type === "notes" && change.source !== "colleges") {
+      const t = qs(`[data-note="${change.id}"]`);
+      if (t) t.value = this.store.record(change.id).notes;
     }
-  } catch(e) { /* no local server (e.g. artifact) — browser storage only */ }
-  fillDefaults();
-  renderAll();
-  document.getElementById("expBtn").addEventListener("click", exportData);
-  document.getElementById("impFile").addEventListener("change", e => {
+  }
+
+  renderFilters() {
+    qs("#areaFilters").innerHTML =
+      `<button class="fchip ${this.activeArea === null ? "on" : ""}" data-area="">All areas</button>` +
+      Object.entries(AREAS)
+        .map(([k, label]) => `<button class="fchip ${this.activeArea === k ? "on" : ""}" data-area="${k}">${label}</button>`)
+        .join("");
+    qsa("#areaFilters .fchip").forEach((b) =>
+      b.addEventListener("click", () => {
+        this.activeArea = b.dataset.area || null;
+        this.renderFilters();
+        this.render();
+      })
+    );
+  }
+
+  render() {
+    const shown = this.activeArea ? SCHOOLS.filter((s) => schoolAreas(s.id).includes(this.activeArea)) : SCHOOLS;
+    qs("#collegeTbl tbody").innerHTML = shown.map((s) => this.rowHtml(s)).join("");
+    this.wireRow();
+  }
+
+  rowHtml(s) {
+    const n = this.store.materialsDone(s.id),
+      tot = CHECK_ITEMS.length;
+    const rec = this.store.record(s.id);
+    const progs = PROGRAMS[s.id] || [];
+    const ex = ADMISSIONS[s.id] || {};
+    return `
+    <tr>
+      <td class="rankno">${s.r}</td>
+      <td style="min-width:210px"><div class="cname">${s.n}</div><div class="csub">${s.c} · ${s.note}</div></td>
+      <td>${probabilityPill(s.id)}</td>
+      <td class="csub" style="min-width:150px;max-width:190px">${ex.ex || "—"}
+        ${ex.v ? '<div><span class="pill p-safe" style="margin-top:3px">✓ verified on univ. site</span></div>' : '<div><span class="pill p-info" style="margin-top:3px">est. — verify</span></div>'}</td>
+      <td class="csub" style="white-space:nowrap">${s.prog}</td>
+      <td style="max-width:180px">${schoolAreas(s.id).map((a) => `<span class="course" title="${AREAS[a]}">${AREAS[a]}</span>`).join("")}
+        <div class="csub" style="margin-top:2px">${progs.length} program${progs.length > 1 ? "s" : ""} — expand for reqs</div></td>
+      <td class="mono" style="font-weight:650">${money(s.t)}${s.t ? '<div class="csub" style="font-family:-apple-system,sans-serif">total, intl</div>' : ""}</td>
+      <td>${deadlineCell(s)}</td>
+      <td><a href="${s.p}" target="_blank" rel="noopener">Apply ↗</a></td>
+      <td>
+        <div class="bar"><i style="width:${(100 * n) / tot}%"></i></div>
+        <div class="prog-lbl">${n}/${tot} ready</div>
+        <button class="btn" data-expand="${s.id}" aria-expanded="false">Checklist &amp; notes</button>
+      </td>
+    </tr>
+    <tr class="detail" id="d-${s.id}" hidden><td colspan="10">
+      <div class="detail-inner">
+        <div style="grid-column:1/-1"><h4>Programs &amp; requirements</h4>
+          ${progs
+            .map(
+              ([areas, name, req]) => `
+          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--line)">
+            <span style="font-weight:650;font-size:13.5px">${name}</span>
+            ${areas.map((a) => `<span class="course">${AREAS[a]}</span>`).join("")}
+            <span class="csub" style="margin-left:auto">${req || "dept policy — see Exams column"}</span>
+          </div>`
+            )
+            .join("")}
+        </div>
+        <div style="grid-column:1/-1"><h4>GRE requirement by program ${ex.v ? '<span class="pill p-safe">✓ verified on university site, Jul 2026</span>' : '<span class="pill p-info">estimated — confirm on portal</span>'}</h4>
+          <p style="margin:0;font-size:13.5px;max-width:100ch">${ex.gd || ex.ex || "See portal."}</p>
+        </div>
+        <div><h4>Application materials</h4>
+          <div class="checks">${CHECK_ITEMS.map(
+            ([k, label]) => `
+            <label><input type="checkbox" data-check="${s.id}:${k}" ${rec.checks[k] ? "checked" : ""}> ${label}</label>`
+          ).join("")}
+          </div>
+        </div>
+        <div><h4>Notes &amp; comments for this college</h4>
+          <textarea data-note="${s.id}" placeholder="Your comments — professor replies, fee waivers, SOP angle, doubts…">${escapeHtml(rec.notes)}</textarea>
+        </div>
+      </div>
+    </td></tr>`;
+  }
+
+  wireRow() {
+    qsa("[data-expand]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const row = document.getElementById("d-" + b.dataset.expand);
+        row.hidden = !row.hidden;
+        b.setAttribute("aria-expanded", String(!row.hidden));
+        b.textContent = row.hidden ? "Checklist & notes" : "Close";
+      })
+    );
+    qsa("[data-check]").forEach((c) =>
+      c.addEventListener("change", () => {
+        const [id, k] = c.dataset.check.split(":");
+        this.store.toggleCheck(id, k, c.checked);
+      })
+    );
+    qsa("[data-note]").forEach((t) =>
+      t.addEventListener("input", () => this.store.setNotes(t.dataset.note, t.value, "colleges"))
+    );
+  }
+
+  refreshProgress(id) {
+    const btn = qs(`[data-expand="${id}"]`);
+    if (!btn) return;
+    const cell = btn.parentElement;
+    const n = this.store.materialsDone(id),
+      tot = CHECK_ITEMS.length;
+    cell.querySelector(".bar i").style.width = (100 * n) / tot + "%";
+    cell.querySelector(".prog-lbl").textContent = `${n}/${tot} ready`;
+  }
+}
+
+/* ===== src/views/ProfessorsView.js ===== */
+// Professors tab: two faculty per university with Scholar links and a "Draft email"
+// action that hands off to the injected EmailModalView. Filter box narrows by any field.
+class ProfessorsView extends View {
+  constructor(emailModal) {
+    super(qs("#profs"));
+    this.emailModal = emailModal;
+  }
+
+  init() {
+    qs("#profSearch").addEventListener("input", (e) => this.render(e.target.value));
+    this.render("");
+  }
+
+  render(filter = "") {
+    const q = filter.trim().toLowerCase();
+    qs("#profList").innerHTML =
+      SCHOOLS.map((s) => {
+        const rows = s.profs.filter(
+          ([name, area]) =>
+            !q || s.n.toLowerCase().includes(q) || name.toLowerCase().includes(q) || area.toLowerCase().includes(q)
+        );
+        if (!rows.length) return "";
+        return `<div class="uniblock">
+        <header><span class="rankno">#${s.r}</span><span class="cname">${s.n}</span>
+          <span class="csub">${s.c}</span>${probabilityPill(s.id)}</header>
+        ${rows
+          .map(
+            ([name, area]) => `
+        <div class="profrow">
+          <span class="pname">${name}</span>
+          <span class="parea">${area}</span>
+          <a href="${ScholarLinkService.authorSearch(name, s.n)}" target="_blank" rel="noopener">Scholar ↗</a>
+          <button class="btn primary" data-mail="${s.id}|${escapeHtml(name)}|${escapeHtml(area)}">Draft email</button>
+        </div>`
+          )
+          .join("")}
+      </div>`;
+      }).join("") || '<p class="note">No matches — try a broader term.</p>';
+
+    qsa("[data-mail]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const [id, name, area] = b.dataset.mail.split("|");
+        this.emailModal.open(SCHOOLS.find((x) => x.id === id), name, area);
+      })
+    );
+  }
+}
+
+/* ===== src/views/EmailModalView.js ===== */
+// Outreach-email dialog: builds a draft with EmailComposer, and offers copy / open-in-mail.
+class EmailModalView extends View {
+  constructor() {
+    super(qs("#overlay"));
+    this.title = qs("#mTitle");
+    this.text = qs("#mText");
+  }
+
+  init() {
+    qs("#mClose").addEventListener("click", () => this.close());
+    this.root.addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) this.close();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.close();
+    });
+    qs("#mCopy").addEventListener("click", () => {
+      navigator.clipboard.writeText(this.text.value).then(() => {
+        const btn = qs("#mCopy");
+        btn.textContent = "Copied ✓";
+        setTimeout(() => (btn.textContent = "Copy email"), 1600);
+      });
+    });
+    qs("#mMailto").addEventListener("click", (e) => {
+      const t = this.text.value;
+      const nl = t.indexOf("\n");
+      const subject = t.slice(9, nl).trim();
+      const body = t.slice(nl + 1).trim();
+      e.currentTarget.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    });
+  }
+
+  open(school, name, area) {
+    this.title.textContent = "Email — " + name + " (" + school.n + ")";
+    this.text.value = EmailComposer.compose(school, name, area).text;
+    this.root.classList.add("on");
+    this.text.focus();
+  }
+
+  close() {
+    this.root.classList.remove("on");
+  }
+}
+
+/* ===== src/views/TrackerView.js ===== */
+// Application Tracker tab: status dropdown, materials progress, deadline, and an
+// editable notes column that stays in sync with the Top-50 tab via the store.
+class TrackerView extends View {
+  constructor(store) {
+    super(qs("#tracker"));
+    this.store = store;
+  }
+
+  onChange(change) {
+    if (["checks", "reset"].includes(change.type)) {
+      this.render();
+    } else if (change.type === "notes" && change.source !== "tracker") {
+      const t = qs(`[data-tnote="${change.id}"]`);
+      if (t) t.value = this.store.record(change.id).notes;
+    }
+  }
+
+  render() {
+    qs("#trackTbl tbody").innerHTML = SCHOOLS.map((s) => {
+      const rec = this.store.record(s.id);
+      const n = this.store.materialsDone(s.id),
+        tot = CHECK_ITEMS.length;
+      const cls = (STATUSES.find((x) => x[0] === rec.status) || STATUSES[0])[2];
+      return `<tr>
+        <td class="rankno">${s.r}</td>
+        <td><div class="cname">${s.n}</div><div class="csub">${s.c}</div></td>
+        <td><select class="status ${cls}" data-status="${s.id}" aria-label="Status for ${s.n}">
+          ${STATUSES.map(([v, l]) => `<option value="${v}" ${v === rec.status ? "selected" : ""}>${l}</option>`).join("")}
+        </select></td>
+        <td><div class="bar"><i style="width:${(100 * n) / tot}%"></i></div><div class="prog-lbl">${n}/${tot} ready</div></td>
+        <td>${deadlineCell(s)}</td>
+        <td style="min-width:220px"><textarea data-tnote="${s.id}" style="min-height:44px" placeholder="Comments…" aria-label="Notes for ${s.n}">${escapeHtml(rec.notes)}</textarea></td>
+      </tr>`;
+    }).join("");
+
+    qsa("[data-status]").forEach((sel) =>
+      sel.addEventListener("change", () => {
+        this.store.setStatus(sel.dataset.status, sel.value);
+        sel.className = "status " + (STATUSES.find((x) => x[0] === sel.value) || STATUSES[0])[2];
+      })
+    );
+    qsa("[data-tnote]").forEach((t) =>
+      t.addEventListener("input", () => this.store.setNotes(t.dataset.tnote, t.value, "tracker"))
+    );
+  }
+}
+
+/* ===== src/views/ValueView.js ===== */
+// Best-value tab: budget picks (< $30K total tuition) as cards, cheapest first.
+class ValueView extends View {
+  constructor() {
+    super(qs("#value"));
+  }
+
+  onChange(change) {
+    if (change.type === "reset") this.render();
+  }
+
+  render() {
+    qs("#valueCards").innerHTML = [...VALUE_SCHOOLS]
+      .sort((a, b) => a.t - b.t)
+      .map(
+        (s, i) => `
+      <div class="vcard">
+        <span class="rank">Value pick #${i + 1}</span>
+        <h3>${s.n}</h3>
+        <div class="price mono">${money(s.t)} <small>est. total intl tuition</small></div>
+        <div class="meta">${s.c} · ${s.why}</div>
+        <div>${s.f.map((c) => `<span class="course">${c}</span>`).join("")}</div>
+        <div class="meta">Deadline ${formatDate(s.d)} (${s.dn})</div>
+        <footer><span class="pill p-safe">Safe</span> <a href="${s.p}" target="_blank" rel="noopener">Admission portal ↗</a></footer>
+      </div>`
+      )
+      .join("");
+  }
+}
+
+/* ===== src/app.js ===== */
+// Composition root: constructs the storage stack, the store, and the views, injects
+// dependencies, and wires the store's change stream to the views. This is the only
+// module that knows the concrete wiring — everything else depends on abstractions.
+
+const STORAGE_KEY = "gradapp-2027-v2";
+
+const storage = new CompositeStorageProvider(
+  new LocalStorageProvider(STORAGE_KEY),
+  new ApiStorageProvider("/api/state")
+);
+const store = new ApplicationStore(storage, SCHOOLS);
+
+const emailModal = new EmailModalView();
+const overview = new OverviewView(store);
+const colleges = new CollegesView(store);
+const professors = new ProfessorsView(emailModal);
+const tracker = new TrackerView(store);
+const value = new ValueView();
+const stateViews = [overview, colleges, tracker, value];
+
+function updateStorageChip() {
+  const el = qs("#storageChip");
+  if (!el) return;
+  el.innerHTML = store.usingRemote
+    ? "💾 Saved to <b>local DB</b> (gradapp.db) — survives every session"
+    : "Saved in <b>this browser</b> — use Export for a backup, or run server.py for a local DB";
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(store.toJSON(), null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gradapp-tracking-backup.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(file) {
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (typeof data !== "object" || !data) throw new Error("bad");
+      store.replaceAll(data);
+    } catch (e) {
+      alert("That file isn't a valid dashboard backup.");
+    }
+  };
+  r.readAsText(file);
+}
+
+async function main() {
+  new TabController().init();
+  emailModal.init();
+  professors.init(); // independent of tracking state
+
+  await store.init(); // load persisted state (remote DB wins if present)
+
+  overview.render();
+  colleges.init();
+  tracker.render();
+  value.render();
+  updateStorageChip();
+
+  store.subscribe((change) => {
+    stateViews.forEach((v) => v.onChange(change));
+    updateStorageChip();
+  });
+
+  qs("#expBtn").addEventListener("click", exportData);
+  qs("#impFile").addEventListener("change", (e) => {
     if (e.target.files[0]) importData(e.target.files[0]);
     e.target.value = "";
   });
-})();
+}
+
+main();
 </script>

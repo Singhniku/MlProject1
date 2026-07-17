@@ -28,8 +28,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
-            self.path = "/grad-dashboard.html"
+        if self.path == "/":
+            self.path = "/index.html"  # modular app entry (src/*.js loaded as ES modules)
         if self.path == "/api/state":
             conn = db()
             row = conn.execute("SELECT value FROM kv WHERE key='state'").fetchone()

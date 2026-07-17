@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MS Fall 2027 — Application Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>MS Fall 2027 · Application Dashboard</h1>
+  <p class="sub">Nikita Singh — top-50 programs, professor outreach, materials, and application tracking</p>
+  <div class="chips">
+    <span class="chip">GRE <b>305</b> · Q<b>160</b> V<b>145</b></span>
+    <span class="chip"><b>4 yrs</b> SWE · Amex, Jubilant, IndiaMart</span>
+    <span class="chip">B.Tech CSE · GPA <b>8.2</b>/10</span>
+    <span class="chip">Focus: <b>AI · ML · DS · Neural Networks</b></span>
+  </div>
+  <div class="chips">
+    <span class="chip" id="storageChip">…</span>
+    <button class="btn" id="expBtn" type="button">⬇ Export data</button>
+    <label class="btn" style="cursor:pointer">⬆ Import data<input type="file" id="impFile" accept="application/json" hidden></label>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button class="on" data-tab="overview">Overview</button>
+  <button data-tab="colleges">Top 50 Colleges</button>
+  <button data-tab="profs">Professors &amp; Outreach</button>
+  <button data-tab="tracker">Application Tracker</button>
+  <button data-tab="value">Best Under $30K</button>
+</nav>
+
+<section id="overview" class="on">
+  <div class="stats" id="statTiles"></div>
+  <div class="cols2">
+    <div class="panel">
+      <h2>Earliest deadlines — Fall 2027</h2>
+      <p class="note">First 12 deadlines across the top-50 list. Expected dates from recent cycles; Fall 2027 portals open Aug–Sep 2026.</p>
+      <ul class="tl" id="timeline"></ul>
+    </div>
+    <div class="panel">
+      <h2>Profile read</h2>
+      <p class="note" style="margin-bottom:6px">Q160 is solid for CS; 4 years of backend + agentic-AI work at Amex is the differentiator — lead with it in the SOP and in professor emails.</p>
+      <div class="advice">Realistic strategy for a GRE 305: treat ranks 1–15 as reach-only (apply to 1–2 max), focus applications on ranks 25–50, and use professor outreach to stand out — a faculty reply mentioning your email can materially help an application.</div>
+      <div class="advice">V145 is below elite-program averages. Retake targeting V150+ or lean on GRE-optional programs with a strong TOEFL/IELTS.</div>
+      <div class="advice">Emails to professors: send Tue–Thu morning (their timezone), attach resume, reference one specific recent paper, follow up once after ~10 days. Response rates are ~10–20%; volume and specificity win.</div>
+    </div>
+  </div>
+</section>
+
+<section id="colleges">
+  <h2>Top 50 US graduate programs — AI · ML · Data Science · Neural Networks · CS</h2>
+  <p class="note">All 50 programs in ascending rank order (1 = strongest), blended from US News CS graduate rankings and CSRankings AI/ML output — no schools filtered out. <b>Admit chance</b> is an estimated probability for your profile (GRE 305 · Q160 · GPA 8.2 · 4 yrs SWE); <b>Exams &amp; scores</b> shows the GRE policy with a competitive score plus TOEFL/IELTS minimums. Tuition is estimated <b>total international tuition</b> (excluding living costs); deadlines are expected Fall 2027 dates. Expand <b>Checklist &amp; notes</b> for the per-program GRE policy (<span class="pill p-safe">✓ verified</span> = checked on the university's own site in July 2026; <span class="pill p-info">est.</span> = from recent cycles), your materials checklist, and a comments box for each college.</p>
+  <div class="toolrow" id="areaFilters" role="group" aria-label="Filter by program area"></div>
+  <div class="tblwrap"><table id="collegeTbl">
+    <thead><tr>
+      <th>#</th><th>University</th><th>Admit chance</th><th>Exams &amp; scores</th><th>Program</th><th>Program areas</th>
+      <th>Tuition (est.)</th><th>Deadline (est.)</th><th>Portal</th><th>Materials</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<section id="profs">
+  <h2>Professors to reach out to</h2>
+  <p class="note">Two AI/ML faculty per university, in rank order. Affiliations are as of early 2026 — professors move, so click <b>Scholar</b> to confirm their current university and skim their 2–3 most recent papers <b>before</b> emailing; the draft has a marked slot where you cite one. <b>Draft email</b> opens a personalized mail built from your profile.</p>
+  <div class="toolrow">
+    <input class="search" id="profSearch" type="search" placeholder="Filter by university, professor, or area (e.g. NLP, vision, reinforcement)…" aria-label="Filter professors">
+  </div>
+  <div id="profList"></div>
+</section>
+
+<section id="tracker">
+  <h2>Application tracker</h2>
+  <p class="note">Status and notes persist in this browser and sync with the Top 50 tab. Type comments directly in the Notes column. Track only the schools you actually apply to — set the rest to “Not started”.</p>
+  <div class="tblwrap"><table id="trackTbl">
+    <thead><tr>
+      <th>#</th><th>University</th><th>Status</th><th>Materials</th><th>Deadline</th><th>Notes</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<section id="value">
+  <h2>Best value — under $30K total tuition</h2>
+  <p class="note">The top-50 research list is expensive (most programs run $40K–$90K+). These budget picks (≈ ₹25–26 lakh or less) sit outside the research top-50 but place well into US tech jobs — a strong plan pairs 6–8 schools from ranks 30–50 with 2–3 of these.</p>
+  <div class="cards" id="valueCards"></div>
+</section>
+
+<p class="foot">Rankings, tuition, deadlines, GRE norms, and faculty affiliations are compiled estimates as of early 2026, assembled to plan ahead for Fall 2027 — official deadlines and fees appear on each portal around Aug–Sep 2026, and faculty move between universities. Verify every school on its own portal and every professor on Google Scholar before paying a fee or sending an email.</p>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal">
+    <header><h3 id="mTitle">Outreach email</h3><button class="btn" id="mClose">Close ✕</button></header>
+    <div class="body">
+      <textarea id="mText" aria-label="Email draft"></textarea>
+    </div>
+    <footer>
+      <span class="hint" id="mHint">Replace the [bracketed] line with a real recent paper from their Scholar page.</span>
+      <button class="btn" id="mCopy">Copy email</button>
+      <a class="btn primary" id="mMailto" href="#">Open in mail app</a>
+    </footer>
+  </div>
+</div>
+
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
